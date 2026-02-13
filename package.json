@@ -9,7 +9,12 @@
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit"
   },
-  "keywords": ["anime", "video", "vue3", "typescript"],
+  "keywords": [
+    "anime",
+    "video",
+    "vue3",
+    "typescript"
+  ],
   "author": "",
   "license": "MIT",
   "description": "动漫视频播放前端网站",
@@ -22,6 +27,7 @@
     "xgplayer": "^3.0.23"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.2.3",
     "@vitejs/plugin-vue": "^6.0.4",
     "autoprefixer": "^10.4.24",
