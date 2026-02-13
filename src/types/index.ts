@@ -1,0 +1,119 @@
+export interface User {
+  id: number
+  username: string
+  email: string
+  avatar: string
+  createdAt: string
+}
+
+export interface LoginParams {
+  email: string
+  password: string
+}
+
+export interface LoginResponse {
+  token: string
+  user: User
+}
+
+export interface Video {
+  id: number
+  title: string
+  cover: string
+  description: string
+  playCount: number
+  likeCount: number
+  collectCount: number
+  episode: string
+  category: string
+  tags: string[]
+  country: string
+  year: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface VideoListParams {
+  category?: string
+  year?: number | string
+  type?: string
+  country?: string
+  page?: number
+  pageSize?: number
+}
+
+export interface VideoListResponse {
+  list: Video[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export interface VideoDetail extends Video {
+  videoUrl: string
+  episodes: Episode[]
+  relatedVideos: Video[]
+}
+
+export interface Episode {
+  id: number
+  title: string
+  videoUrl: string
+  duration: number
+}
+
+export interface Comment {
+  id: number
+  userId: number
+  username: string
+  avatar: string
+  content: string
+  likeCount: number
+  createdAt: string
+  replies?: Comment[]
+}
+
+export interface CommentParams {
+  videoId: number
+  content: string
+  parentId?: number
+}
+
+export interface Danmaku {
+  id: number
+  content: string
+  time: number
+  color: string
+  type: 'scroll' | 'top' | 'bottom'
+  userId: number
+  createdAt: string
+}
+
+export interface DanmakuParams {
+  videoId: number
+  content: string
+  time: number
+  color?: string
+  type?: 'scroll' | 'top' | 'bottom'
+}
+
+export interface Category {
+  id: number
+  name: string
+  slug: string
+  icon?: string
+}
+
+export interface Tag {
+  id: number
+  name: string
+  type: 'genre' | 'country'
+}
+
+export type ThemeMode = 'light' | 'dark'
+
+export interface ApiResponse<T = unknown> {
+  code: number
+  message: string
+  data: T
+}
