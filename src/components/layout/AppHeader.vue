@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NInput, NDropdown, NAvatar } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
@@ -11,11 +11,29 @@ const userStore = useUserStore()
 
 const searchKeyword = ref('')
 const searchFocused = ref(false)
+const searchExpanded = ref(false)
+const searchInputRef = ref<any>(null)
 
 function handleSearch() {
   if (searchKeyword.value.trim()) {
     router.push({ name: 'Search', query: { q: searchKeyword.value.trim() } })
+    closeSearch()
   }
+}
+
+function openSearch() {
+  searchExpanded.value = true
+  document.body.style.overflow = 'hidden'
+  setTimeout(() => {
+    if (searchInputRef.value) {
+      searchInputRef.value.focus()
+    }
+  }, 100)
+}
+
+function closeSearch() {
+  searchExpanded.value = false
+  document.body.style.overflow = ''
 }
 
 function handleLogout() {
@@ -49,6 +67,25 @@ function handleUserDropdown(key: string) {
 }
 
 const isHome = computed(() => route.name === 'Home')
+
+watch(searchExpanded, (val) => {
+  if (val) {
+    document.addEventListener('keydown', handleEscKey)
+  } else {
+    document.removeEventListener('keydown', handleEscKey)
+  }
+})
+
+function handleEscKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    closeSearch()
+  }
+}
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscKey)
+  document.body.style.overflow = ''
+})
 </script>
 
 <template>
@@ -66,25 +103,15 @@ const isHome = computed(() => route.name === 'Home')
       </div>
 
       <div class="app-header__right">
-        <div class="search-box" :class="{ 'search-box--focused': searchFocused }">
+        <div 
+          class="search-box" 
+          :class="{ 'search-box--focused': searchFocused }"
+          @click="openSearch"
+        >
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
-          <NInput
-            v-model:value="searchKeyword"
-            placeholder="搜索动漫..."
-            :bordered="false"
-            size="small"
-            @focus="searchFocused = true"
-            @blur="searchFocused = false"
-            @keyup.enter="handleSearch"
-            class="search-input"
-          />
-          <button v-if="searchKeyword" class="search-clear" @click="searchKeyword = ''">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-          </button>
+          <span class="search-placeholder">搜索动漫...</span>
         </div>
 
         <ThemeToggle />
@@ -113,6 +140,70 @@ const isHome = computed(() => route.name === 'Home')
         </template>
       </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="search-overlay">
+        <div 
+          v-if="searchExpanded" 
+          class="search-overlay"
+          @click.self="closeSearch"
+        >
+          <div class="search-modal">
+            <div class="search-modal__header">
+              <div class="search-modal__input-wrapper">
+                <svg class="search-modal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <NInput
+                  ref="searchInputRef"
+                  v-model:value="searchKeyword"
+                  placeholder="搜索动漫、番剧、剧场版..."
+                  :bordered="false"
+                  size="large"
+                  @focus="searchFocused = true"
+                  @blur="searchFocused = false"
+                  @keyup.enter="handleSearch"
+                  class="search-modal__input"
+                />
+                <button 
+                  v-if="searchKeyword" 
+                  class="search-modal__clear"
+                  @click="searchKeyword = ''"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+              <button class="search-modal__close" @click="closeSearch">
+                取消
+              </button>
+            </div>
+            
+            <div class="search-modal__content">
+              <div v-if="!searchKeyword" class="search-modal__suggestions">
+                <h3 class="search-modal__title">热门搜索</h3>
+                <div class="search-modal__tags">
+                  <button 
+                    v-for="tag in ['进击的巨人', '鬼灭之刃', '咒术回战', '间谍过家家', '我的英雄学院', '海贼王']" 
+                    :key="tag"
+                    class="search-modal__tag"
+                    @click="searchKeyword = tag; handleSearch()"
+                  >
+                    {{ tag }}
+                  </button>
+                </div>
+              </div>
+              <div v-else class="search-modal__results">
+                <p class="search-modal__hint">
+                  按 <kbd>Enter</kbd> 搜索 "{{ searchKeyword }}"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </header>
 </template>
 
@@ -198,10 +289,10 @@ const isHome = computed(() => route.name === 'Home')
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--bg-secondary);
-  border: 2px solid transparent;
   border-radius: var(--radius-full);
+  cursor: pointer;
   transition: all var(--transition-fast);
   width: 200px;
 }
@@ -216,48 +307,16 @@ const isHome = computed(() => route.name === 'Home')
   background-color: var(--bg-hover);
 }
 
-.search-box--focused {
-  background-color: var(--bg-color);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px var(--color-primary-light);
-}
-
 .search-icon {
   width: 18px;
   height: 18px;
   color: var(--text-muted);
   flex-shrink: 0;
-  transition: color var(--transition-fast);
 }
 
-.search-box--focused .search-icon {
-  color: var(--color-primary);
-}
-
-.search-input {
-  flex: 1;
-}
-
-.search-clear {
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.search-placeholder {
   color: var(--text-muted);
-  cursor: pointer;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
-}
-
-.search-clear:hover {
-  color: var(--text-color);
-  background-color: var(--bg-hover);
-}
-
-.search-clear svg {
-  width: 14px;
-  height: 14px;
+  font-size: var(--font-size-sm);
 }
 
 .user-avatar {
@@ -300,5 +359,176 @@ const isHome = computed(() => route.name === 'Home')
   .search-box {
     width: 150px;
   }
+}
+
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+  display: flex;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+.dark .search-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.search-modal {
+  width: 100%;
+  max-width: 640px;
+  background-color: var(--bg-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  margin: 0 var(--spacing-md);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-modal__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-modal__input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.search-modal__icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-modal__input {
+  flex: 1;
+}
+
+.search-modal__clear {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.search-modal__clear:hover {
+  color: var(--text-color);
+  background-color: var(--bg-hover);
+}
+
+.search-modal__clear svg {
+  width: 16px;
+  height: 16px;
+}
+
+.search-modal__close {
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.search-modal__close:hover {
+  color: var(--text-color);
+  background-color: var(--bg-hover);
+}
+
+.search-modal__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+}
+
+.search-modal__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.search-modal__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.search-modal__tag {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--bg-secondary);
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.search-modal__tag:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.dark .search-modal__tag:hover {
+  background-color: var(--color-primary-900);
+  color: var(--color-primary);
+}
+
+.search-modal__hint {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.search-modal__hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+}
+
+.search-overlay-enter-active,
+.search-overlay-leave-active {
+  transition: all var(--transition-normal);
+}
+
+.search-overlay-enter-active .search-modal,
+.search-overlay-leave-active .search-modal {
+  transition: all var(--transition-normal);
+}
+
+.search-overlay-enter-from,
+.search-overlay-leave-to {
+  opacity: 0;
+}
+
+.search-overlay-enter-from .search-modal,
+.search-overlay-leave-to .search-modal {
+  transform: translateY(-20px) scale(0.95);
+  opacity: 0;
 }
 </style>

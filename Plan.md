@@ -1048,3 +1048,30 @@ Large:  高度 44px, 内边距 16px 24px, 字号 16px
 |---------|---------|
 | `src/styles/global.css` | 添加 n-input-wrapper、filter-select 暗色模式样式 |
 | `src/components/common/CategoryTabs.vue` | 移除激活背景，优化指示器定位 |
+
+---
+
+## 18. 搜索框样式优化 (2026-02-14)
+
+### 18.1 功能概述 ✅
+
+重构搜索框交互体验，实现点击后弹出居中放大搜索框并背景虚化效果：
+- **点击触发**: 点击导航栏搜索框弹出搜索模态框
+- **居中放大**: 搜索框居中显示于页面上端
+- **背景虚化**: 使用 `backdrop-filter: blur()` 实现背景模糊效果
+- **热门搜索**: 显示热门搜索标签，点击可直接搜索
+- **键盘支持**: ESC 关闭搜索框，Enter 执行搜索
+
+### 18.2 技术实现
+
+- 使用 `Teleport` 将搜索模态框渲染到 `body` 元素
+- 使用 Vue `Transition` 组件实现淡入淡出动画
+- 使用 `backdrop-filter: blur(8px)` 实现背景虚化
+- 监听键盘事件处理 ESC 关闭
+- 禁止背景滚动 (`document.body.style.overflow = 'hidden'`)
+
+### 18.3 修改文件
+
+| 文件路径 | 修改内容 |
+|---------|---------|
+| `src/components/layout/AppHeader.vue` | 重构搜索框，添加搜索模态框组件 |
