@@ -1023,3 +1023,28 @@ Large:  高度 44px, 内边距 16px 24px, 字号 16px
 | `src/styles/global.css` | 添加 Naive UI 组件暗色模式样式覆盖 |
 | `src/stores/video.ts` | 调整分区顺序 |
 | `src/components/common/WeekSchedule.vue` | 简化当前日期样式 |
+
+---
+
+## 17. UI 优化记录 (2026-02-14 续)
+
+### 17.1 暗色模式输入框/选择器颜色修复 ✅
+
+修复 `n-input-wrapper` 和 `filter-select` 组件在暗色主题下的颜色问题：
+- **输入框背景**: 使用 `--bg-secondary` 替代白色背景
+- **文字颜色**: 确保输入文字使用 `--text-color`
+- **边框颜色**: 正确显示默认、悬浮、聚焦状态的边框
+- **选择器**: 修复下拉选择器的背景和文字颜色
+
+### 17.2 分区切换按钮样式优化 ✅
+
+- **删除高亮背景**: 移除激活状态下的背景色填充
+- **仅保留下横线**: 指示器仅显示在文字下方，宽度与文字对齐
+- **简化设计**: 使用 2px 纯色横线替代渐变效果
+
+### 17.3 修改文件列表
+
+| 文件路径 | 修改内容 |
+|---------|---------|
+| `src/styles/global.css` | 添加 n-input-wrapper、filter-select 暗色模式样式 |
+| `src/components/common/CategoryTabs.vue` | 移除激活背景，优化指示器定位 |

@@ -715,3 +715,78 @@ ul, ol {
 .dark .n-dropdown-option:hover {
   background-color: var(--bg-hover) !important;
 }
+
+.dark .n-input-wrapper {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .n-input-wrapper .n-input__input-el,
+.dark .n-input-wrapper .n-input__textarea-el {
+  color: var(--text-color) !important;
+  background-color: transparent !important;
+}
+
+.dark .n-input-wrapper .n-input__border,
+.dark .n-input-wrapper .n-input__state-border {
+  border-color: var(--border-color) !important;
+}
+
+.dark .n-input-wrapper:hover .n-input__border,
+.dark .n-input-wrapper:hover .n-input__state-border {
+  border-color: var(--text-muted) !important;
+}
+
+.dark .n-input-wrapper:focus-within .n-input__border,
+.dark .n-input-wrapper:focus-within .n-input__state-border {
+  border-color: var(--color-primary) !important;
+}
+
+.dark .filter-select .n-base-selection {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .filter-select .n-base-selection .n-base-selection-label {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+}
+
+.dark .filter-select .n-base-selection .n-base-selection__border,
+.dark .filter-select .n-base-selection .n-base-selection__state-border {
+  border-color: var(--border-color) !important;
+}
+
+.dark .filter-select .n-base-selection:hover .n-base-selection__border,
+.dark .filter-select .n-base-selection:hover .n-base-selection__state-border {
+  border-color: var(--text-muted) !important;
+}
+
+.dark .filter-select .n-base-selection:focus-within .n-base-selection__border,
+.dark .filter-select .n-base-selection:focus-within .n-base-selection__state-border {
+  border-color: var(--color-primary) !important;
+}
+
+.dark .filter-select .n-base-selection-placeholder__inner {
+  color: var(--text-muted) !important;
+}
+
+.dark .n-input,
+.dark .n-input .n-input-wrapper {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .n-input .n-input__input-el {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+}
+
+.dark .n-input .n-input__border {
+  border-color: var(--border-color) !important;
+}
+
+.dark .n-input:hover .n-input__border {
+  border-color: var(--text-muted) !important;
+}
+
+.dark .n-input:focus-within .n-input__border {
+  border-color: var(--color-primary) !important;
+}

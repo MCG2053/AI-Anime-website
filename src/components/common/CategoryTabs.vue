@@ -83,9 +83,19 @@ const updateIndicator = () => {
     if (activeTab && tabsList.value) {
       const listRect = tabsList.value.getBoundingClientRect()
       const tabRect = activeTab.getBoundingClientRect()
-      indicatorStyle.value = {
-        left: `${tabRect.left - listRect.left}px`,
-        width: `${tabRect.width}px`
+      const labelEl = activeTab.querySelector('.category-tabs__label')
+      if (labelEl) {
+        const labelRect = labelEl.getBoundingClientRect()
+        const labelCenter = labelRect.left + labelRect.width / 2
+        indicatorStyle.value = {
+          left: `${labelCenter - listRect.left - labelRect.width / 2}px`,
+          width: `${labelRect.width}px`
+        }
+      } else {
+        indicatorStyle.value = {
+          left: `${tabRect.left - listRect.left}px`,
+          width: `${tabRect.width}px`
+        }
       }
     }
   })
@@ -156,11 +166,6 @@ defineExpose({ updateIndicator })
 
 .category-tabs__item--active {
   color: var(--color-primary);
-  background-color: var(--color-primary-light);
-}
-
-.dark .category-tabs__item--active {
-  background-color: var(--color-primary-900);
 }
 
 .category-tabs__icon {
@@ -183,11 +188,11 @@ defineExpose({ updateIndicator })
 .category-tabs__indicator {
   position: absolute;
   bottom: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-  border-radius: var(--radius-full) var(--radius-full) 0 0;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
   transition: all var(--transition-normal);
-  z-index: 0;
+  z-index: 2;
 }
 
 @media (max-width: 640px) {
