@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NInput, NDropdown, NAvatar } from 'naive-ui'
+import { NDropdown, NAvatar } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
+import { useVideoStore } from '@/stores/video'
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
+const videoStore = useVideoStore()
 
 const searchKeyword = ref('')
 const searchFocused = ref(false)
 const searchExpanded = ref(false)
 const searchInputRef = ref<any>(null)
+const tabRefs = ref<Record<string, HTMLElement>>({})
+const indicatorStyle = ref({ left: '0px', width: '0px' })
 
 const hotSearchTags = ['进击的巨人', '鬼灭之刃', '咒术回战', '间谍过家家', '我的英雄学院', '海贼王', '一拳超人', '刀剑神域']
 
@@ -23,6 +27,36 @@ const searchSuggestions = computed(() => {
     tag.toLowerCase().includes(keyword)
   ).slice(0, 5)
 })
+
+const currentCategory = computed({
+  get: () => videoStore.currentCategory,
+  set: (value) => videoStore.setCategory(value)
+})
+
+const isHome = computed(() => route.name === 'Home')
+const isSearchPage = computed(() => route.name === 'Search')
+
+const updateIndicator = () => {
+  nextTick(() => {
+    const activeTab = tabRefs.value[currentCategory.value]
+    if (activeTab) {
+      const labelEl = activeTab.querySelector('.nav-tabs__label')
+      if (labelEl) {
+        indicatorStyle.value = {
+          left: `${activeTab.offsetLeft + (activeTab.offsetWidth - labelEl.getBoundingClientRect().width) / 2}px`,
+          width: `${labelEl.getBoundingClientRect().width}px`
+        }
+      }
+    }
+  })
+}
+
+function handleCategoryClick(slug: string) {
+  if (slug !== currentCategory.value) {
+    currentCategory.value = slug
+    updateIndicator()
+  }
+}
 
 function handleSearch() {
   if (searchKeyword.value.trim()) {
@@ -82,9 +116,6 @@ function handleUserDropdown(key: string) {
   }
 }
 
-const isHome = computed(() => route.name === 'Home')
-const isSearchPage = computed(() => route.name === 'Search')
-
 watch(searchExpanded, (val) => {
   if (val) {
     document.addEventListener('keydown', handleEscKey)
@@ -92,6 +123,8 @@ watch(searchExpanded, (val) => {
     document.removeEventListener('keydown', handleEscKey)
   }
 })
+
+watch(currentCategory, updateIndicator)
 
 function handleEscKey(e: KeyboardEvent) {
   if (e.key === 'Escape') {
@@ -107,55 +140,70 @@ onUnmounted(() => {
 
 <template>
   <header class="app-header" :class="{ 'app-header--home': isHome }">
-    <div class="app-header__container">
-      <div class="app-header__left">
-        <router-link to="/" class="app-header__logo">
-          <div class="logo-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
-            </svg>
-          </div>
-          <span class="logo-text">Anime Video</span>
-        </router-link>
-      </div>
-
-      <div class="app-header__right">
-        <div 
-          v-if="!isSearchPage"
-          class="search-box" 
-          :class="{ 'search-box--focused': searchFocused }"
-          @click="openSearch"
-        >
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          <span class="search-placeholder">搜索动漫...</span>
+    <div class="app-header__main">
+      <div class="app-header__container">
+        <div class="app-header__left">
+          <router-link to="/" class="app-header__logo">
+            <div class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
+              </svg>
+            </div>
+            <span class="logo-text">Anime Video</span>
+          </router-link>
         </div>
 
-        <ThemeToggle />
+        <div class="app-header__center" v-if="isHome">
+          <div class="nav-tabs">
+            <button
+              v-for="category in videoStore.categories"
+              :key="category.slug"
+              :ref="el => { if (el) tabRefs[category.slug] = el as HTMLElement }"
+              :class="['nav-tabs__item', { 'nav-tabs__item--active': currentCategory === category.slug }]"
+              @click="handleCategoryClick(category.slug)"
+            >
+              <span class="nav-tabs__label">{{ category.name }}</span>
+            </button>
+            <div class="nav-tabs__indicator" :style="indicatorStyle"></div>
+          </div>
+        </div>
 
-        <template v-if="userStore.isLoggedIn">
-          <NDropdown
-            :options="userDropdownOptions"
-            @select="handleUserDropdown"
-            placement="bottom-end"
-            :show-arrow="true"
+        <div class="app-header__right">
+          <div 
+            v-if="!isSearchPage"
+            class="search-box" 
+            @click="openSearch"
           >
-            <div class="user-avatar">
-              <NAvatar
-                round
-                :src="userStore.avatar"
-                :alt="userStore.username"
-                size="small"
-              />
-            </div>
-          </NDropdown>
-        </template>
-        <template v-else>
-          <button class="login-btn" @click="router.push('/login')">
-            登录
-          </button>
-        </template>
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+
+          <ThemeToggle />
+
+          <template v-if="userStore.isLoggedIn">
+            <NDropdown
+              :options="userDropdownOptions"
+              @select="handleUserDropdown"
+              placement="bottom-end"
+              :show-arrow="true"
+            >
+              <div class="user-avatar">
+                <NAvatar
+                  round
+                  :src="userStore.avatar"
+                  :alt="userStore.username"
+                  size="small"
+                />
+              </div>
+            </NDropdown>
+          </template>
+          <template v-else>
+            <button class="login-btn" @click="router.push('/login')">
+              登录
+            </button>
+          </template>
+        </div>
       </div>
     </div>
 
@@ -167,20 +215,19 @@ onUnmounted(() => {
           @click.self="closeSearch"
         >
           <div class="search-modal">
-            <div class="search-modal__input-wrapper">
+            <div class="search-modal__input-wrapper" :class="{ 'search-modal__input-wrapper--focused': searchFocused }">
               <svg class="search-modal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
-              <NInput
+              <input
                 ref="searchInputRef"
-                v-model:value="searchKeyword"
-                placeholder="搜索动漫、番剧、剧场版..."
-                :bordered="false"
-                size="large"
+                v-model="searchKeyword"
+                type="text"
+                class="search-modal__input"
+                placeholder="搜索动漫..."
                 @focus="searchFocused = true"
                 @blur="searchFocused = false"
                 @keyup.enter="handleSearch"
-                class="search-modal__input"
               />
               <button 
                 v-if="searchKeyword" 
@@ -234,11 +281,15 @@ onUnmounted(() => {
   border-bottom: none;
 }
 
+.app-header__main {
+  border-bottom: 1px solid var(--border-color);
+}
+
 .app-header__container {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
-  height: 64px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -248,7 +299,6 @@ onUnmounted(() => {
 .app-header__left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xl);
 }
 
 .app-header__logo {
@@ -264,8 +314,8 @@ onUnmounted(() => {
 }
 
 .logo-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   border-radius: var(--radius-md);
   display: flex;
@@ -276,39 +326,79 @@ onUnmounted(() => {
 }
 
 .logo-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .logo-text {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   font-weight: 700;
   color: var(--text-color);
   white-space: nowrap;
 }
 
+.app-header__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.nav-tabs__item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+  position: relative;
+}
+
+.nav-tabs__item:hover {
+  color: var(--text-color);
+}
+
+.nav-tabs__item--active {
+  color: var(--color-primary);
+}
+
+.nav-tabs__label {
+  line-height: 1;
+}
+
+.nav-tabs__indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-normal);
+}
+
 .app-header__right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .search-box {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   background-color: var(--bg-secondary);
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all var(--transition-fast);
-  width: 200px;
-}
-
-@media (min-width: 1024px) {
-  .search-box {
-    width: 280px;
-  }
 }
 
 .search-box:hover {
@@ -319,12 +409,6 @@ onUnmounted(() => {
   width: 18px;
   height: 18px;
   color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.search-placeholder {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
 }
 
 .user-avatar {
@@ -339,7 +423,7 @@ onUnmounted(() => {
 }
 
 .login-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-md);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
   font-size: var(--font-size-sm);
@@ -355,17 +439,18 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
 }
 
-.login-btn:active {
-  transform: translateY(0);
-}
-
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .logo-text {
     display: none;
   }
 
-  .search-box {
-    width: 150px;
+  .app-header__center {
+    display: none;
+  }
+
+  .nav-tabs__item {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
   }
 }
 
@@ -389,9 +474,9 @@ onUnmounted(() => {
 
 .search-modal {
   width: 100%;
-  max-width: 600px;
+  max-width: 400px;
   background-color: var(--bg-color);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-full);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   margin: 0 var(--spacing-md);
@@ -401,23 +486,39 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.search-modal__input-wrapper--focused {
+  border-color: var(--color-primary);
 }
 
 .search-modal__icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .search-modal__input {
   flex: 1;
+  padding: var(--spacing-sm) 0;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.search-modal__input::placeholder {
+  color: var(--text-muted);
 }
 
 .search-modal__clear {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -433,22 +534,26 @@ onUnmounted(() => {
 }
 
 .search-modal__clear svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .search-modal__dropdown {
-  border-top: 1px solid var(--border-color);
-  max-height: 300px;
+  background-color: var(--bg-color);
+  border-radius: var(--radius-lg);
+  margin: var(--spacing-xs);
+  margin-top: 0;
+  box-shadow: var(--shadow-lg);
+  max-height: 240px;
   overflow-y: auto;
 }
 
 .search-modal__suggestion {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: var(--spacing-sm) var(--spacing-md);
   text-align: left;
   transition: background-color var(--transition-fast);
 }
@@ -458,14 +563,14 @@ onUnmounted(() => {
 }
 
 .search-modal__suggestion-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .search-modal__suggestion-text {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--text-color);
 }
 
@@ -486,7 +591,7 @@ onUnmounted(() => {
 
 .search-overlay-enter-from .search-modal,
 .search-overlay-leave-to .search-modal {
-  transform: translateY(-30px) scale(0.95);
+  transform: translateY(-20px) scale(0.95);
   opacity: 0;
 }
 

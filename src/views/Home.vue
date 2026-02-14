@@ -3,7 +3,6 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { NSpin, NSelect } from 'naive-ui'
 import { useVideoStore, type WeekSchedule } from '@/stores/video'
-import CategoryTabs from '@/components/common/CategoryTabs.vue'
 import VideoCard from '@/components/common/VideoCard.vue'
 import WeekScheduleComponent from '@/components/common/WeekSchedule.vue'
 import Skeleton from '@/components/common/Skeleton.vue'
@@ -88,6 +87,10 @@ watch(() => route.query.category, (newCategory) => {
   }
 }, { immediate: true })
 
+watch(currentCategory, (newCategory) => {
+  handleCategoryChange(newCategory)
+})
+
 onMounted(() => {
   const category = route.query.category as string
   if (category) {
@@ -101,12 +104,6 @@ onMounted(() => {
 
 <template>
   <div class="home-page">
-    <CategoryTabs 
-      v-model="currentCategory" 
-      :categories="videoStore.categories"
-      @change="handleCategoryChange"
-    />
-
     <div class="home-page__container">
       <template v-if="isScheduleView">
         <WeekScheduleComponent 
