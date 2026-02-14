@@ -257,3 +257,141 @@ Mock 数据替换：当后端接口完成时，只需修改 request.ts 中的 ba
 
 8. 总结
 本框架详细描述了动漫视频播放前端网站的技术选型、功能模块、项目结构和分阶段开发流程。通过预留接口层和 Mock 方案，项目可在内测阶段无后端独立运行，待后端就绪后快速接入，降低联调风险。按照此流程开发，可确保项目结构清晰、易于维护和扩展。
+
+---
+
+## 9. 开发进度记录
+
+### v1.0.0 - 初始版本 (2026-02-14)
+
+#### 已完成阶段
+
+**✅ 阶段一：需求确认与设计**
+- 确认功能细节，采用现代扁平风格界面设计
+- 定义色彩系统（浅色背景#FFFFFF，深色背景#121212，强调色#0ea5e9）
+- 设计路由结构（/、/login、/video/:id、/search、/user）
+- 定义与后端的接口契约（TypeScript类型定义）
+
+**✅ 阶段二：项目初始化与基础搭建**
+- 使用 Vite 创建 Vue 3 + TypeScript 项目
+- 安装并配置 Vue Router 4、Pinia
+- 安装 UI 组件库 Naive UI（支持按需引入和主题定制）
+- 安装 Tailwind CSS v4 + @tailwindcss/postcss
+- 配置 Axios 实例，添加请求/响应拦截器
+- 配置环境变量（.env.development、.env.production）
+
+**✅ 阶段三：核心功能开发**
+
+*5.3.1 主题切换模块*
+- [x] 在 Pinia 中创建 theme store（stores/theme.ts）
+- [x] 定义 CSS 变量（styles/variables.css）
+- [x] 创建 ThemeToggle 组件（components/theme/ThemeToggle.vue）
+- [x] 支持系统主题跟随
+
+*5.3.2 用户认证模块*
+- [x] 创建登录页面（views/Login.vue）
+- [x] 表单验证（邮箱+密码）
+- [x] Mock 登录接口
+- [x] JWT Token 存储于 localStorage
+- [x] 路由守卫保护需要登录的页面
+- [x] 退出登录功能
+
+*5.3.3 视频分区与筛选模块*
+- [x] 定义分区数据结构（推荐、番剧、国创、剧场版、OVA）
+- [x] 顶部导航栏展示分区（components/layout/AppHeader.vue）
+- [x] 筛选栏组件：年份、类型、国家选择
+- [x] 视频列表卡片组件（components/video/VideoCard.vue）
+
+*5.3.4 视频播放页面*
+- [x] 使用 xgplayer 封装 VideoPlayer 组件
+- [x] 视频信息展示（标题、简介、播放量、点赞、收藏）
+- [x] 弹幕发送组件（components/video/DanmakuSender.vue）
+- [x] 评论模块（components/video/CommentSection.vue）
+- [x] 选集功能
+- [x] 相关推荐
+
+*5.3.5 接口 Mock 方案*
+- [x] 在 services/mock 中编写 Mock 数据
+- [x] Mock 数据结构与最终 API 一致
+
+**✅ 阶段六：构建与部署准备**
+- [x] Git 仓库初始化
+- [x] 创建 v1.0.0 版本标签
+- [x] 开发服务器运行正常（http://localhost:3000/）
+
+#### 项目文件清单
+
+```
+src/
+├── components/
+│   ├── layout/
+│   │   ├── AppLayout.vue      # 主布局组件
+│   │   ├── AppHeader.vue      # 顶部导航栏
+│   │   └── AppFooter.vue      # 底部页脚
+│   ├── theme/
+│   │   └── ThemeToggle.vue    # 主题切换按钮
+│   └── video/
+│       ├── VideoCard.vue      # 视频卡片
+│       ├── VideoPlayer.vue    # 视频播放器
+│       ├── DanmakuSender.vue  # 弹幕发送
+│       └── CommentSection.vue # 评论区
+├── views/
+│   ├── Home.vue               # 首页
+│   ├── Login.vue              # 登录页
+│   ├── VideoDetail.vue        # 视频详情页
+│   ├── Search.vue             # 搜索页
+│   ├── NotFound.vue           # 404页面
+│   └── User/
+│       └── index.vue          # 个人中心
+├── router/
+│   └── index.ts               # 路由配置
+├── stores/
+│   ├── user.ts                # 用户状态
+│   ├── theme.ts               # 主题状态
+│   └── video.ts               # 视频状态
+├── services/
+│   ├── request.ts             # Axios 实例
+│   ├── api/
+│   │   ├── user.ts            # 用户接口
+│   │   ├── video.ts           # 视频接口
+│   │   ├── comment.ts         # 评论接口
+│   │   └── danmaku.ts         # 弹幕接口
+│   └── mock/
+│       └── index.ts           # Mock 数据
+├── types/
+│   └── index.ts               # 类型定义
+├── utils/
+│   ├── storage.ts             # 本地存储
+│   ├── theme.ts               # 主题工具
+│   └── date.ts                # 日期工具
+├── styles/
+│   ├── variables.css          # CSS 变量
+│   └── global.css             # 全局样式
+├── App.vue
+├── main.ts
+└── vite-env.d.ts
+```
+
+#### 待完成阶段
+
+**⏳ 阶段四：前后端联调与适配**
+- [ ] 后端 API 就绪后，修改环境变量
+- [ ] 根据实际接口响应调整前端数据适配层
+- [ ] 处理跨域问题
+
+**⏳ 阶段五：测试与优化**
+- [ ] 单元测试
+- [ ] 加载状态、骨架屏优化
+- [ ] 路由懒加载、组件异步加载
+- [ ] 兼容性测试
+
+#### Git 提交记录
+
+| 提交ID | 日期 | 说明 |
+|--------|------|------|
+| 78ad2fb | 2026-02-14 | feat: 初始化项目 - 动漫视频播放前端网站 |
+| 5cb0592 | 2026-02-14 | fix: 修复Tailwind CSS v4 PostCSS配置 |
+
+#### 版本标签
+
+- **v1.0.0** - 初始版本，完成核心功能开发
