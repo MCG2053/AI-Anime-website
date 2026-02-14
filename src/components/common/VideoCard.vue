@@ -2,51 +2,48 @@
   <router-link 
     :to="`/bangumi/${video.id}`" 
     class="video-card"
-    ref="cardRef"
+    :style="cardStyle"
     @mousemove="handleMouseMove"
     @mouseleave="handleMouseLeave"
   >
-    <div class="video-card__shine" :style="shineStyle"></div>
-    <div class="video-card__inner" :style="cardStyle">
-      <div class="video-card__cover">
-        <img
-          :src="video.cover"
-          :alt="video.title"
-          class="video-card__image"
-          loading="lazy"
-        />
-        <div class="video-card__overlay">
-          <div class="video-card__play">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-        </div>
-        <div v-if="video.updateInfo" class="video-card__badge">
-          {{ video.updateInfo }}
-        </div>
-        <div class="video-card__duration" v-if="video.duration">
-          {{ formatDuration(video.duration) }}
+    <div class="video-card__cover">
+      <img
+        :src="video.cover"
+        :alt="video.title"
+        class="video-card__image"
+        loading="lazy"
+      />
+      <div class="video-card__overlay">
+        <div class="video-card__play">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
         </div>
       </div>
-      <div class="video-card__content">
-        <h3 class="video-card__title" :title="video.title">
-          {{ video.title }}
-        </h3>
-        <div class="video-card__meta">
-          <span class="video-card__views">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-            </svg>
-            {{ formatViews(video.views) }}
-          </span>
-          <span class="video-card__year">{{ video.year }}</span>
-        </div>
-        <div v-if="video.tags && video.tags.length" class="video-card__tags">
-          <span v-for="tag in video.tags.slice(0, 2)" :key="tag" class="tag tag-primary">
-            {{ tag }}
-          </span>
-        </div>
+      <div v-if="video.updateInfo" class="video-card__badge">
+        {{ video.updateInfo }}
+      </div>
+      <div class="video-card__duration" v-if="video.duration">
+        {{ formatDuration(video.duration) }}
+      </div>
+    </div>
+    <div class="video-card__content">
+      <h3 class="video-card__title" :title="video.title">
+        {{ video.title }}
+      </h3>
+      <div class="video-card__meta">
+        <span class="video-card__views">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+          </svg>
+          {{ formatViews(video.views) }}
+        </span>
+        <span class="video-card__year">{{ video.year }}</span>
+      </div>
+      <div v-if="video.tags && video.tags.length" class="video-card__tags">
+        <span v-for="tag in video.tags.slice(0, 2)" :key="tag" class="tag tag-primary">
+          {{ tag }}
+        </span>
       </div>
     </div>
   </router-link>
@@ -60,56 +57,36 @@ defineProps<{
   video: Video
 }>()
 
-const cardRef = ref<HTMLElement | null>(null)
 const isHovering = ref(false)
-const mouseX = ref(0.5)
-const mouseY = ref(0.5)
+const rotateX = ref(0)
+const rotateY = ref(0)
 
-const cardStyle = computed(() => {
-  if (!isHovering.value) {
-    return {
-      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)'
-    }
-  }
-  
-  const rotateX = (mouseY.value - 0.5) * -15
-  const rotateY = (mouseX.value - 0.5) * 15
-  
-  return {
-    transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
-  }
-})
-
-const shineStyle = computed(() => {
-  if (!isHovering.value) {
-    return {
-      opacity: '0',
-      background: 'linear-gradient(135deg, transparent 0%, transparent 100%)'
-    }
-  }
-  
-  const shineX = mouseX.value * 100
-  const shineY = mouseY.value * 100
-  
-  return {
-    opacity: '1',
-    background: `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255, 255, 255, 0.25) 0%, transparent 50%)`
-  }
-})
+const cardStyle = computed(() => ({
+  transform: isHovering.value 
+    ? `perspective(1000px) rotateX(${rotateX.value}deg) rotateY(${rotateY.value}deg) scale(1.02)`
+    : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
+  transition: isHovering.value ? 'transform 0.1s ease-out' : 'transform 0.3s ease-out'
+}))
 
 function handleMouseMove(e: MouseEvent) {
-  if (!cardRef.value) return
+  const target = e.currentTarget as HTMLElement
+  if (!target) return
   
   isHovering.value = true
-  const rect = cardRef.value.getBoundingClientRect()
-  mouseX.value = (e.clientX - rect.left) / rect.width
-  mouseY.value = (e.clientY - rect.top) / rect.height
+  const rect = target.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+  
+  rotateX.value = Math.round((y - centerY) / centerY * -12)
+  rotateY.value = Math.round((x - centerX) / centerX * 12)
 }
 
 function handleMouseLeave() {
   isHovering.value = false
-  mouseX.value = 0.5
-  mouseY.value = 0.5
+  rotateX.value = 0
+  rotateY.value = 0
 }
 
 const formatViews = (views?: number): string => {
@@ -129,30 +106,14 @@ const formatDuration = (seconds: number): string => {
 
 <style scoped>
 .video-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  position: relative;
   background-color: var(--bg-card);
-}
-
-.video-card__shine {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: var(--radius-lg);
-}
-
-.video-card__inner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  transition: transform 0.15s ease-out;
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
