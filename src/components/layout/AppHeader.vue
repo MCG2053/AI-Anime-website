@@ -14,11 +14,26 @@ const searchFocused = ref(false)
 const searchExpanded = ref(false)
 const searchInputRef = ref<any>(null)
 
+const hotSearchTags = ['进击的巨人', '鬼灭之刃', '咒术回战', '间谍过家家', '我的英雄学院', '海贼王', '一拳超人', '刀剑神域']
+
+const searchSuggestions = computed(() => {
+  if (!searchKeyword.value.trim()) return []
+  const keyword = searchKeyword.value.toLowerCase()
+  return hotSearchTags.filter(tag => 
+    tag.toLowerCase().includes(keyword)
+  ).slice(0, 5)
+})
+
 function handleSearch() {
   if (searchKeyword.value.trim()) {
     router.push({ name: 'Search', query: { q: searchKeyword.value.trim() } })
     closeSearch()
   }
+}
+
+function handleSuggestionClick(suggestion: string) {
+  searchKeyword.value = suggestion
+  handleSearch()
 }
 
 function openSearch() {
@@ -33,6 +48,7 @@ function openSearch() {
 
 function closeSearch() {
   searchExpanded.value = false
+  searchKeyword.value = ''
   document.body.style.overflow = ''
 }
 
@@ -67,6 +83,7 @@ function handleUserDropdown(key: string) {
 }
 
 const isHome = computed(() => route.name === 'Home')
+const isSearchPage = computed(() => route.name === 'Search')
 
 watch(searchExpanded, (val) => {
   if (val) {
@@ -104,6 +121,7 @@ onUnmounted(() => {
 
       <div class="app-header__right">
         <div 
+          v-if="!isSearchPage"
           class="search-box" 
           :class="{ 'search-box--focused': searchFocused }"
           @click="openSearch"
@@ -149,55 +167,57 @@ onUnmounted(() => {
           @click.self="closeSearch"
         >
           <div class="search-modal">
-            <div class="search-modal__header">
-              <div class="search-modal__input-wrapper">
-                <svg class="search-modal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            <div class="search-modal__input-wrapper">
+              <svg class="search-modal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <NInput
+                ref="searchInputRef"
+                v-model:value="searchKeyword"
+                placeholder="搜索动漫、番剧、剧场版..."
+                :bordered="false"
+                size="large"
+                @focus="searchFocused = true"
+                @blur="searchFocused = false"
+                @keyup.enter="handleSearch"
+                class="search-modal__input"
+              />
+              <button 
+                v-if="searchKeyword" 
+                class="search-modal__clear"
+                @click="searchKeyword = ''"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
-                <NInput
-                  ref="searchInputRef"
-                  v-model:value="searchKeyword"
-                  placeholder="搜索动漫、番剧、剧场版..."
-                  :bordered="false"
-                  size="large"
-                  @focus="searchFocused = true"
-                  @blur="searchFocused = false"
-                  @keyup.enter="handleSearch"
-                  class="search-modal__input"
-                />
-                <button 
-                  v-if="searchKeyword" 
-                  class="search-modal__clear"
-                  @click="searchKeyword = ''"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
-              </div>
-              <button class="search-modal__close" @click="closeSearch">
-                取消
               </button>
             </div>
             
-            <div class="search-modal__content">
-              <div v-if="!searchKeyword" class="search-modal__suggestions">
-                <h3 class="search-modal__title">热门搜索</h3>
-                <div class="search-modal__tags">
-                  <button 
-                    v-for="tag in ['进击的巨人', '鬼灭之刃', '咒术回战', '间谍过家家', '我的英雄学院', '海贼王']" 
-                    :key="tag"
-                    class="search-modal__tag"
-                    @click="searchKeyword = tag; handleSearch()"
-                  >
-                    {{ tag }}
-                  </button>
-                </div>
-              </div>
-              <div v-else class="search-modal__results">
-                <p class="search-modal__hint">
-                  按 <kbd>Enter</kbd> 搜索 "{{ searchKeyword }}"
-                </p>
+            <div class="search-modal__dropdown" v-if="searchKeyword && searchSuggestions.length > 0">
+              <button 
+                v-for="suggestion in searchSuggestions" 
+                :key="suggestion"
+                class="search-modal__suggestion"
+                @click="handleSuggestionClick(suggestion)"
+              >
+                <svg class="search-modal__suggestion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span class="search-modal__suggestion-text">{{ suggestion }}</span>
+              </button>
+            </div>
+
+            <div class="search-modal__content" v-if="!searchKeyword">
+              <h3 class="search-modal__title">热门搜索</h3>
+              <div class="search-modal__tags">
+                <button 
+                  v-for="tag in hotSearchTags" 
+                  :key="tag"
+                  class="search-modal__tag"
+                  @click="searchKeyword = tag; handleSearch()"
+                >
+                  {{ tag }}
+                </button>
               </div>
             </div>
           </div>
@@ -381,33 +401,20 @@ onUnmounted(() => {
 
 .search-modal {
   width: 100%;
-  max-width: 640px;
+  max-width: 560px;
   background-color: var(--bg-color);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   margin: 0 var(--spacing-md);
-  max-height: 70vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.search-modal__header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
 }
 
 .search-modal__input-wrapper {
-  flex: 1;
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  background-color: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .search-modal__icon {
@@ -422,8 +429,8 @@ onUnmounted(() => {
 }
 
 .search-modal__clear {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -439,27 +446,43 @@ onUnmounted(() => {
 }
 
 .search-modal__clear svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
-.search-modal__close {
-  padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+.search-modal__dropdown {
+  border-bottom: 1px solid var(--border-color);
+  max-height: 280px;
+  overflow-y: auto;
 }
 
-.search-modal__close:hover {
-  color: var(--text-color);
+.search-modal__suggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  text-align: left;
+  transition: background-color var(--transition-fast);
+}
+
+.search-modal__suggestion:hover {
   background-color: var(--bg-hover);
 }
 
+.search-modal__suggestion-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-modal__suggestion-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-color);
+}
+
 .search-modal__content {
-  flex: 1;
-  overflow-y: auto;
   padding: var(--spacing-lg);
 }
 
@@ -493,22 +516,6 @@ onUnmounted(() => {
 .dark .search-modal__tag:hover {
   background-color: var(--color-primary-900);
   color: var(--color-primary);
-}
-
-.search-modal__hint {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  text-align: center;
-}
-
-.search-modal__hint kbd {
-  display: inline-block;
-  padding: 2px 6px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: var(--font-size-xs);
 }
 
 .search-overlay-enter-active,

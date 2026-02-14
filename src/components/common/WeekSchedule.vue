@@ -6,12 +6,11 @@
         <button 
           v-for="day in weekDays" 
           :key="day.day"
-          :ref="el => { if (el) dayRefs[day.day] = el as HTMLElement }"
           :class="['week-schedule__day-btn', { 
-            'week-schedule__day-btn--active': activeDay === day.day,
+            'week-schedule__day-btn--active': selectedDay === day.day,
             'week-schedule__day-btn--today': day.day === todayDay
           }]"
-          @click="scrollToDay(day.day)"
+          @click="selectDay(day.day)"
         >
           <span class="week-schedule__day-name">{{ day.dayName }}</span>
           <span class="week-schedule__day-count" v-if="day.videos.length">{{ day.videos.length }}</span>
@@ -20,29 +19,26 @@
     </div>
 
     <NSpin :show="loading">
-      <div class="week-schedule__content" ref="contentRef">
+      <div class="week-schedule__content">
         <div 
-          v-for="day in weekDays" 
-          :key="day.day"
-          :ref="el => { if (el) sectionRefs[day.day] = el as HTMLElement }"
-          :class="['week-schedule__section', { 'week-schedule__section--today': day.day === todayDay }]"
+          :class="['week-schedule__section', { 'week-schedule__section--today': currentDay.day === todayDay }]"
         >
           <div class="week-schedule__section-header">
             <h3 class="week-schedule__section-title">
-              <span class="week-schedule__section-icon" v-if="day.day === todayDay">
+              <span class="week-schedule__section-icon" v-if="currentDay.day === todayDay">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
                 </svg>
               </span>
-              {{ day.dayName }}
-              <span class="week-schedule__today-badge" v-if="day.day === todayDay">今天</span>
+              {{ currentDay.dayName }}
+              <span class="week-schedule__today-badge" v-if="currentDay.day === todayDay">今天</span>
             </h3>
-            <span class="week-schedule__section-count">{{ day.videos.length }} 部更新</span>
+            <span class="week-schedule__section-count">{{ currentDay.videos.length }} 部更新</span>
           </div>
 
-          <div class="week-schedule__grid" v-if="day.videos.length > 0">
+          <div class="week-schedule__grid" v-if="currentDay.videos.length > 0">
             <router-link
-              v-for="video in day.videos"
+              v-for="video in currentDay.videos"
               :key="video.id"
               :to="`/video/${video.id}`"
               class="schedule-card"
@@ -80,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { NSpin } from 'naive-ui'
 import type { WeekSchedule } from '@/stores/video'
 
@@ -89,10 +85,7 @@ const props = defineProps<{
   loading?: boolean
 }>()
 
-const contentRef = ref<HTMLElement | null>(null)
-const dayRefs = ref<Record<string, HTMLElement>>({})
-const sectionRefs = ref<Record<string, HTMLElement>>({})
-const activeDay = ref('')
+const selectedDay = ref('')
 
 const weekDays = computed(() => {
   const order = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
@@ -111,6 +104,10 @@ const todayDay = computed(() => {
   return days[new Date().getDay()]
 })
 
+const currentDay = computed(() => {
+  return weekDays.value.find(d => d.day === selectedDay.value) || weekDays.value[0]
+})
+
 function getDayName(day: string): string {
   const dayNames: Record<string, string> = {
     monday: '周一',
@@ -124,26 +121,12 @@ function getDayName(day: string): string {
   return dayNames[day] || day
 }
 
-function scrollToDay(day: string) {
-  activeDay.value = day
-  const section = sectionRefs.value[day]
-  if (section && contentRef.value) {
-    const headerOffset = 120
-    const elementPosition = section.offsetTop
-    contentRef.value.scrollTo({
-      top: elementPosition - headerOffset,
-      behavior: 'smooth'
-    })
-  }
+function selectDay(day: string) {
+  selectedDay.value = day
 }
 
 onMounted(() => {
-  nextTick(() => {
-    activeDay.value = todayDay.value
-    setTimeout(() => {
-      scrollToDay(todayDay.value)
-    }, 100)
-  })
+  selectedDay.value = todayDay.value
 })
 </script>
 
@@ -234,13 +217,10 @@ onMounted(() => {
 }
 
 .week-schedule__content {
-  max-height: calc(100vh - 300px);
-  overflow-y: auto;
   padding: var(--spacing-md);
 }
 
 .week-schedule__section {
-  margin-bottom: var(--spacing-lg);
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
   background-color: var(--bg-secondary);
