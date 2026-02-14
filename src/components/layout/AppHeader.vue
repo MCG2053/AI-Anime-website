@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NInput, NButton, NDropdown, NAvatar, NSpace } from 'naive-ui'
+import { NInput, NDropdown, NAvatar } from 'naive-ui'
 import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
 import { useVideoStore } from '@/stores/video'
@@ -14,6 +14,7 @@ const userStore = useUserStore()
 const videoStore = useVideoStore()
 
 const searchKeyword = ref('')
+const searchFocused = ref(false)
 
 const activeCategory = computed(() => videoStore.currentCategory)
 
@@ -60,50 +61,50 @@ function handleUserDropdown(key: string) {
 </script>
 
 <template>
-  <header class="app-header sticky top-0 z-50 bg-[var(--bg-color)] border-b border-[var(--border-color)] shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-8">
-        <router-link to="/" class="flex items-center gap-2 text-xl font-bold text-primary-500">
-          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
-          </svg>
-          <span>Anime Video</span>
+  <header class="app-header">
+    <div class="app-header__container">
+      <div class="app-header__left">
+        <router-link to="/" class="app-header__logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
+            </svg>
+          </div>
+          <span class="logo-text">Anime Video</span>
         </router-link>
 
-        <nav class="hidden md:flex items-center gap-1">
+        <nav class="app-header__nav">
           <button
             v-for="category in videoStore.categories"
             :key="category.slug"
             @click="handleCategoryClick(category.slug)"
-            :class="[
-              'px-4 py-2 rounded-md text-sm font-medium transition-colors',
-              activeCategory === category.slug
-                ? 'bg-primary-500 text-white'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-            ]"
+            :class="['nav-item', { 'nav-item--active': activeCategory === category.slug }]"
           >
             {{ category.name }}
           </button>
         </nav>
       </div>
 
-      <div class="flex items-center gap-4">
-        <div class="hidden sm:flex items-center">
+      <div class="app-header__right">
+        <div class="search-box" :class="{ 'search-box--focused': searchFocused }">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
           <NInput
             v-model:value="searchKeyword"
             placeholder="搜索动漫..."
-            clearable
+            :bordered="false"
+            size="small"
+            @focus="searchFocused = true"
+            @blur="searchFocused = false"
             @keyup.enter="handleSearch"
-            class="w-48 lg:w-64"
-          >
-            <template #suffix>
-              <button @click="handleSearch" class="text-[var(--text-muted)] hover:text-primary-500">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-              </button>
-            </template>
-          </NInput>
+            class="search-input"
+          />
+          <button v-if="searchKeyword" class="search-clear" @click="searchKeyword = ''">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
         </div>
 
         <ThemeToggle />
@@ -113,23 +114,22 @@ function handleUserDropdown(key: string) {
             :options="userDropdownOptions"
             @select="handleUserDropdown"
             placement="bottom-end"
+            :show-arrow="true"
           >
-            <NAvatar
-              round
-              :src="userStore.avatar"
-              :alt="userStore.username"
-              class="cursor-pointer"
-            />
+            <div class="user-avatar">
+              <NAvatar
+                round
+                :src="userStore.avatar"
+                :alt="userStore.username"
+                size="small"
+              />
+            </div>
           </NDropdown>
         </template>
         <template v-else>
-          <NButton
-            type="primary"
-            @click="router.push('/login')"
-            size="small"
-          >
+          <button class="login-btn" @click="router.push('/login')">
             登录
-          </NButton>
+          </button>
         </template>
       </div>
     </div>
@@ -138,7 +138,213 @@ function handleUserDropdown(key: string) {
 
 <style scoped>
 .app-header {
-  backdrop-filter: blur(8px);
-  background-color: rgba(var(--bg-color), 0.9);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+.dark .app-header {
+  background-color: rgba(18, 18, 18, 0.9);
+}
+
+.app-header__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.app-header__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  transition: transform var(--transition-fast);
+}
+
+.app-header__logo:hover {
+  transform: scale(1.02);
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+.logo-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.logo-text {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.app-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+@media (max-width: 768px) {
+  .app-header__nav {
+    display: none;
+  }
+}
+
+.nav-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.nav-item:hover {
+  color: var(--text-color);
+  background-color: var(--bg-hover);
+}
+
+.nav-item--active {
+  color: white;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+.nav-item--active:hover {
+  color: white;
+  background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-700) 100%);
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  width: 200px;
+}
+
+@media (min-width: 1024px) {
+  .search-box {
+    width: 280px;
+  }
+}
+
+.search-box:hover {
+  background-color: var(--bg-hover);
+}
+
+.search-box--focused {
+  background-color: var(--bg-color);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+.search-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.search-box--focused .search-icon {
+  color: var(--color-primary);
+}
+
+.search-input {
+  flex: 1;
+}
+
+.search-clear {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.search-clear:hover {
+  color: var(--text-color);
+  background-color: var(--bg-hover);
+}
+
+.search-clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+.user-avatar {
+  cursor: pointer;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.user-avatar:hover {
+  background-color: var(--bg-hover);
+}
+
+.login-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+}
+
+.login-btn:active {
+  transform: translateY(0);
 }
 </style>
