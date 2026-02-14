@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { NSpin, NTabs, NTabPane, NButton, NSpace, NAvatar } from 'naive-ui'
+import { NSpin, NTabs, NTabPane, NButton, NSpace } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import VideoPlayer from '@/components/video/VideoPlayer.vue'
 import DanmakuSender from '@/components/video/DanmakuSender.vue'
 import CommentSection from '@/components/video/CommentSection.vue'
-import VideoCard from '@/components/video/VideoCard.vue'
 import { generateMockVideoDetail, generateMockDanmaku, mockComments } from '@/services/mock'
 import type { VideoDetail, Danmaku, Comment } from '@/types'
 

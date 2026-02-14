@@ -1,5 +1,5 @@
 import { http } from '../request'
-import type { Video, VideoListParams, VideoListResponse, VideoDetail, Category, Tag } from '@/types'
+import type { VideoListParams, VideoListResponse, VideoDetail, Category, Tag } from '@/types'
 
 export const videoApi = {
   getVideoList(params: VideoListParams) {

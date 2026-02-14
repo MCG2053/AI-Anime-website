@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NTabs, NTabPane, NCard, NAvatar, NButton, NEmpty } from 'naive-ui'
+import { NTabs, NTabPane, NCard, NAvatar, NEmpty } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { generateMockVideos } from '@/services/mock'
 import VideoCard from '@/components/video/VideoCard.vue'

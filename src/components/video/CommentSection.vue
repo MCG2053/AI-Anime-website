@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref } from 'vue'
 import { NAvatar, NButton, NInput, NSpin, NEmpty } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import type { Comment } from '@/types'

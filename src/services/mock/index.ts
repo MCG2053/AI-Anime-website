@@ -193,3 +193,91 @@ export const mockLoginResponse = {
   token: 'mock_jwt_token_' + Date.now(),
   user: mockUser
 }
+
+export interface WeekScheduleData {
+  day: string
+  dayName: string
+  videos: Video[]
+}
+
+const scheduleTitles = [
+  '进击的巨人 最终季',
+  '鬼灭之刃 柱训练篇',
+  '咒术回战 第二季',
+  '间谍过家家 第二季',
+  '我推的孩子',
+  '葬送的芙莉莲',
+  '药屋少女的呢喃',
+  '迷宫饭',
+  '无职转生 第三季',
+  '关于我转生变成史莱姆这档事',
+  '刀剑神域 Progressive',
+  'Re:从零开始的异世界生活',
+  '辉夜大小姐想让我告白',
+  '一拳超人 第三季',
+  '我的英雄学院 第七季',
+  '蓝色监狱 第二季',
+  '排球少年 垃圾场的决战',
+  '魔法使的新娘 第三季',
+  '地狱乐 第二季',
+  '不死不幸'
+]
+
+const updateTimes = ['00:00', '10:00', '12:00', '17:00', '18:00', '20:00', '22:00', '23:30']
+
+export function generateWeekSchedule(): WeekScheduleData[] {
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  const dayNames: Record<string, string> = {
+    monday: '周一',
+    tuesday: '周二',
+    wednesday: '周三',
+    thursday: '周四',
+    friday: '周五',
+    saturday: '周六',
+    sunday: '周日'
+  }
+
+  return days.map(day => {
+    const videoCount = randomInt(3, 8)
+    const videos: Video[] = []
+    const usedTitles = new Set<string>()
+
+    for (let i = 0; i < videoCount; i++) {
+      let title = randomItem(scheduleTitles)
+      while (usedTitles.has(title)) {
+        title = randomItem(scheduleTitles)
+      }
+      usedTitles.add(title)
+
+      videos.push({
+        id: randomInt(1000, 9999),
+        title,
+        cover: `https://picsum.photos/seed/schedule${day}${i}/300/400`,
+        description: randomItem(descriptions),
+        playCount: randomInt(10000, 9999999),
+        likeCount: randomInt(1000, 999999),
+        collectCount: randomInt(100, 99999),
+        episode: `更新至第${randomInt(1, 24)}话`,
+        category: 'anime',
+        tags: [randomItem(mockTags.filter(t => t.type === 'genre')).name],
+        country: '日本',
+        year: new Date().getFullYear(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        currentEpisode: randomInt(1, 24),
+        updateTime: randomItem(updateTimes)
+      })
+    }
+
+    videos.sort((a, b) => {
+      if (!a.updateTime || !b.updateTime) return 0
+      return a.updateTime.localeCompare(b.updateTime)
+    })
+
+    return {
+      day,
+      dayName: dayNames[day],
+      videos
+    }
+  })
+}

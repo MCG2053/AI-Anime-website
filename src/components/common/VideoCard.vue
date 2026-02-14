@@ -44,13 +44,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Video } from '@/types/video'
+import type { Video } from '@/types'
 
 defineProps<{
   video: Video
 }>()
 
-const formatViews = (views: number): string => {
+const formatViews = (views?: number): string => {
+  if (!views) return '0'
   if (views >= 10000) {
     return `${(views / 10000).toFixed(1)}万`
   }

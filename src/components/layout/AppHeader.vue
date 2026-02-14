@@ -2,26 +2,15 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NInput, NDropdown, NAvatar } from 'naive-ui'
-import { useThemeStore } from '@/stores/theme'
 import { useUserStore } from '@/stores/user'
-import { useVideoStore } from '@/stores/video'
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
 
 const router = useRouter()
 const route = useRoute()
-const themeStore = useThemeStore()
 const userStore = useUserStore()
-const videoStore = useVideoStore()
 
 const searchKeyword = ref('')
 const searchFocused = ref(false)
-
-const activeCategory = computed(() => videoStore.currentCategory)
-
-function handleCategoryClick(slug: string) {
-  videoStore.setCategory(slug)
-  router.push({ name: 'Home', query: { category: slug } })
-}
 
 function handleSearch() {
   if (searchKeyword.value.trim()) {
@@ -58,10 +47,12 @@ function handleUserDropdown(key: string) {
       break
   }
 }
+
+const isHome = computed(() => route.name === 'Home')
 </script>
 
 <template>
-  <header class="app-header">
+  <header class="app-header" :class="{ 'app-header--home': isHome }">
     <div class="app-header__container">
       <div class="app-header__left">
         <router-link to="/" class="app-header__logo">
@@ -72,17 +63,6 @@ function handleUserDropdown(key: string) {
           </div>
           <span class="logo-text">Anime Video</span>
         </router-link>
-
-        <nav class="app-header__nav">
-          <button
-            v-for="category in videoStore.categories"
-            :key="category.slug"
-            @click="handleCategoryClick(category.slug)"
-            :class="['nav-item', { 'nav-item--active': activeCategory === category.slug }]"
-          >
-            {{ category.name }}
-          </button>
-        </nav>
       </div>
 
       <div class="app-header__right">
@@ -151,6 +131,10 @@ function handleUserDropdown(key: string) {
   background-color: rgba(18, 18, 18, 0.9);
 }
 
+.app-header--home {
+  border-bottom: none;
+}
+
 .app-header__container {
   max-width: 1280px;
   margin: 0 auto;
@@ -202,46 +186,6 @@ function handleUserDropdown(key: string) {
   font-weight: 700;
   color: var(--text-color);
   white-space: nowrap;
-}
-
-.app-header__nav {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-@media (max-width: 768px) {
-  .app-header__nav {
-    display: none;
-  }
-}
-
-.nav-item {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: transparent;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  position: relative;
-}
-
-.nav-item:hover {
-  color: var(--text-color);
-  background-color: var(--bg-hover);
-}
-
-.nav-item--active {
-  color: white;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-}
-
-.nav-item--active:hover {
-  color: white;
-  background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-700) 100%);
 }
 
 .app-header__right {
@@ -346,5 +290,15 @@ function handleUserDropdown(key: string) {
 
 .login-btn:active {
   transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .logo-text {
+    display: none;
+  }
+
+  .search-box {
+    width: 150px;
+  }
 }
 </style>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref } from 'vue'
 import { NInput, NButton, NColorPicker, NSelect } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
-import type { Danmaku } from '@/types'
 
 const props = defineProps<{
   currentTime: number

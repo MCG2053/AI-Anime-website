@@ -1,8 +1,6 @@
 import { storage } from './storage'
 import type { ThemeMode } from '@/types'
 
-const THEME_KEY = 'anime_theme'
-
 export const themeUtils = {
   getStoredTheme(): ThemeMode {
     const stored = storage.getTheme()

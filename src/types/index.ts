@@ -31,6 +31,11 @@ export interface Video {
   year: number
   createdAt: string
   updatedAt: string
+  views?: number
+  duration?: number
+  updateInfo?: string
+  currentEpisode?: number
+  updateTime?: string
 }
 
 export interface VideoListParams {

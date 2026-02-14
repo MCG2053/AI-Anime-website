@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NForm, NFormItem, NInput, NButton } from 'naive-ui'
+import { NForm, NFormItem, NInput } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { mockLoginResponse } from '@/services/mock'
 
@@ -32,8 +32,7 @@ const isPasswordValid = computed(() => {
 
 const rules = {
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
+    { required: true, message: '请输入邮箱', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -126,7 +125,6 @@ async function handleSubmit() {
               <NInput
                 v-model:value="formValue.email"
                 placeholder="请输入邮箱"
-                type="email"
                 :bordered="false"
                 size="large"
                 @blur="validateEmail"
