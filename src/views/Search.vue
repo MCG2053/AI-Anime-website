@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import VideoCard from '@/components/video/VideoCard.vue'
+import VideoCard from '@/components/common/VideoCard.vue'
 import { generateMockVideos, mockTags } from '@/services/mock'
 
 const route = useRoute()
