@@ -193,33 +193,21 @@ onUnmounted(() => {
               </button>
             </div>
             
-            <div class="search-modal__dropdown" v-if="searchKeyword && searchSuggestions.length > 0">
-              <button 
-                v-for="suggestion in searchSuggestions" 
-                :key="suggestion"
-                class="search-modal__suggestion"
-                @click="handleSuggestionClick(suggestion)"
-              >
-                <svg class="search-modal__suggestion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <span class="search-modal__suggestion-text">{{ suggestion }}</span>
-              </button>
-            </div>
-
-            <div class="search-modal__content" v-if="!searchKeyword">
-              <h3 class="search-modal__title">热门搜索</h3>
-              <div class="search-modal__tags">
+            <Transition name="dropdown">
+              <div class="search-modal__dropdown" v-if="searchKeyword && searchSuggestions.length > 0">
                 <button 
-                  v-for="tag in hotSearchTags" 
-                  :key="tag"
-                  class="search-modal__tag"
-                  @click="searchKeyword = tag; handleSearch()"
+                  v-for="suggestion in searchSuggestions" 
+                  :key="suggestion"
+                  class="search-modal__suggestion"
+                  @click="handleSuggestionClick(suggestion)"
                 >
-                  {{ tag }}
+                  <svg class="search-modal__suggestion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                  <span class="search-modal__suggestion-text">{{ suggestion }}</span>
                 </button>
               </div>
-            </div>
+            </Transition>
           </div>
         </div>
       </Transition>
@@ -392,7 +380,7 @@ onUnmounted(() => {
   z-index: var(--z-modal);
   display: flex;
   justify-content: center;
-  padding-top: 15vh;
+  padding-top: 20vh;
 }
 
 .dark .search-overlay {
@@ -401,7 +389,7 @@ onUnmounted(() => {
 
 .search-modal {
   width: 100%;
-  max-width: 560px;
+  max-width: 600px;
   background-color: var(--bg-color);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
@@ -413,13 +401,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-lg) var(--spacing-xl);
 }
 
 .search-modal__icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -429,8 +416,8 @@ onUnmounted(() => {
 }
 
 .search-modal__clear {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -446,22 +433,22 @@ onUnmounted(() => {
 }
 
 .search-modal__clear svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .search-modal__dropdown {
-  border-bottom: 1px solid var(--border-color);
-  max-height: 280px;
+  border-top: 1px solid var(--border-color);
+  max-height: 300px;
   overflow-y: auto;
 }
 
 .search-modal__suggestion {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-xl);
   text-align: left;
   transition: background-color var(--transition-fast);
 }
@@ -471,51 +458,15 @@ onUnmounted(() => {
 }
 
 .search-modal__suggestion-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .search-modal__suggestion-text {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--text-color);
-}
-
-.search-modal__content {
-  padding: var(--spacing-lg);
-}
-
-.search-modal__title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-}
-
-.search-modal__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-}
-
-.search-modal__tag {
-  padding: var(--spacing-xs) var(--spacing-md);
-  background-color: var(--bg-secondary);
-  color: var(--text-color);
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
-}
-
-.search-modal__tag:hover {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.dark .search-modal__tag:hover {
-  background-color: var(--color-primary-900);
-  color: var(--color-primary);
 }
 
 .search-overlay-enter-active,
@@ -535,7 +486,18 @@ onUnmounted(() => {
 
 .search-overlay-enter-from .search-modal,
 .search-overlay-leave-to .search-modal {
-  transform: translateY(-20px) scale(0.95);
+  transform: translateY(-30px) scale(0.95);
   opacity: 0;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all var(--transition-fast);
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>
