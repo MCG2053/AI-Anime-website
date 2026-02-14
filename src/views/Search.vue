@@ -359,10 +359,13 @@ function applyFilters() {
 
 .filter-row__label {
   flex-shrink: 0;
-  width: 48px;
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--text-color);
+  width: 52px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   padding-top: 6px;
 }
 

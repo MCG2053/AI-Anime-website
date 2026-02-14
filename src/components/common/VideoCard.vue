@@ -143,12 +143,12 @@ const formatDuration = (seconds: number): string => {
   top: var(--spacing-sm);
   left: var(--spacing-sm);
   padding: 2px 8px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   color: white;
   font-size: var(--font-size-xs);
   font-weight: 500;
   border-radius: var(--radius-sm);
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
 }
 
 .video-card__duration {
@@ -179,7 +179,10 @@ const formatDuration = (seconds: number): string => {
 }
 
 .video-card:hover .video-card__title {
-  color: var(--color-primary);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .video-card__meta {
@@ -207,7 +210,13 @@ const formatDuration = (seconds: number): string => {
 }
 
 .video-card__tags .tag {
-  font-size: var(--font-size-xs);
-  padding: 2px 6px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  background-color: var(--bg-color);
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 </style>

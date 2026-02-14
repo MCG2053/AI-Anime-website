@@ -288,13 +288,20 @@ ul, ol {
 }
 
 .tag-primary {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary-700);
+  background-color: var(--bg-color);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .dark .tag-primary {
-  background-color: var(--color-primary-900);
-  color: var(--color-primary-300);
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .tag-success {
