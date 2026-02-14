@@ -16,8 +16,8 @@ export const useVideoStore = defineStore('video', () => {
     { id: 2, name: '番剧', slug: 'anime', icon: 'play' },
     { id: 3, name: '国创', slug: 'chinese', icon: 'star' },
     { id: 4, name: '剧场版', slug: 'movie', icon: 'film' },
-    { id: 5, name: '周更表', slug: 'schedule', icon: 'calendar' },
-    { id: 6, name: 'OVA', slug: 'ova', icon: 'disc' }
+    { id: 5, name: 'OVA', slug: 'ova', icon: 'disc' },
+    { id: 6, name: '周更表', slug: 'schedule', icon: 'calendar' }
   ])
   const currentCategory = ref<string>('recommend')
   const filters = ref<VideoListParams>({})

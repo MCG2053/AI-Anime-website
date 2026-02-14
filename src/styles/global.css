@@ -619,3 +619,99 @@ ul, ol {
     scroll-behavior: auto !important;
   }
 }
+
+.dark .n-input,
+.dark .n-input__input-el,
+.dark .n-input__textarea-el {
+  color: var(--text-color) !important;
+  caret-color: var(--color-primary) !important;
+}
+
+.dark .n-input:not(.n-input--disabled):hover {
+  border-color: var(--border-color) !important;
+}
+
+.dark .n-input:not(.n-input--disabled):focus-within {
+  border-color: var(--color-primary) !important;
+}
+
+.dark .n-input .n-input__input-el::placeholder,
+.dark .n-input .n-input__textarea-el::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.dark .n-base-selection {
+  --n-text-color: var(--text-color) !important;
+  --n-placeholder-color: var(--text-muted) !important;
+}
+
+.dark .n-base-selection .n-base-selection-label {
+  color: var(--text-color) !important;
+}
+
+.dark .n-base-selection:not(.n-base-selection--disabled):hover {
+  border-color: var(--border-color) !important;
+}
+
+.dark .n-base-selection:not(.n-base-selection--disabled):focus-within {
+  border-color: var(--color-primary) !important;
+}
+
+.dark .n-base-select-menu {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .n-base-select-menu .n-base-select-option {
+  color: var(--text-color) !important;
+}
+
+.dark .n-base-select-menu .n-base-select-option:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.dark .n-base-select-menu .n-base-select-option.n-base-select-option--selected {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+}
+
+.dark .n-spin {
+  --n-text-color: var(--text-color) !important;
+}
+
+.dark .n-empty {
+  --n-text-color: var(--text-muted) !important;
+}
+
+.dark .n-tabs {
+  --n-tab-text-color: var(--text-secondary) !important;
+  --n-tab-text-color-active: var(--color-primary) !important;
+  --n-tab-text-color-hover: var(--text-color) !important;
+  --n-bar-color: var(--color-primary) !important;
+}
+
+.dark .n-card {
+  --n-color: var(--bg-card) !important;
+  --n-text-color: var(--text-color) !important;
+  --n-border-color: var(--border-color) !important;
+}
+
+.dark .n-button {
+  --n-text-color: var(--text-color) !important;
+}
+
+.dark .n-button.n-button--primary-type {
+  --n-text-color: #ffffff !important;
+}
+
+.dark .n-dropdown-menu {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.dark .n-dropdown-option {
+  color: var(--text-color) !important;
+}
+
+.dark .n-dropdown-option:hover {
+  background-color: var(--bg-hover) !important;
+}

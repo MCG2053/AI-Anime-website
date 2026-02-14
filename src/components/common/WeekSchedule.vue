@@ -248,12 +248,8 @@ onMounted(() => {
 }
 
 .week-schedule__section--today {
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--bg-secondary) 100%);
-  border: 1px solid var(--color-primary);
-}
-
-.dark .week-schedule__section--today {
-  background: linear-gradient(135deg, var(--color-primary-900) 0%, var(--bg-secondary) 100%);
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--color-primary);
 }
 
 .week-schedule__section-header {
