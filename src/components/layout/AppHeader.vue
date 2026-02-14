@@ -331,7 +331,7 @@ onUnmounted(() => {
 }
 
 .logo-text {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--text-color);
   white-space: nowrap;
@@ -352,7 +352,7 @@ onUnmounted(() => {
 
 .nav-tabs__item {
   padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--text-secondary);
   background: transparent;
@@ -474,9 +474,9 @@ onUnmounted(() => {
 
 .search-modal {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   background-color: var(--bg-color);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   margin: 0 var(--spacing-md);
@@ -486,13 +486,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 2px solid transparent;
-  transition: border-color var(--transition-fast);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .search-modal__input-wrapper--focused {
-  border-color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 .search-modal__icon {
@@ -540,11 +539,7 @@ onUnmounted(() => {
 
 .search-modal__dropdown {
   background-color: var(--bg-color);
-  border-radius: var(--radius-lg);
-  margin: var(--spacing-xs);
-  margin-top: 0;
-  box-shadow: var(--shadow-lg);
-  max-height: 240px;
+  max-height: 280px;
   overflow-y: auto;
 }
 
@@ -553,7 +548,7 @@ onUnmounted(() => {
   align-items: center;
   gap: var(--spacing-sm);
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   text-align: left;
   transition: background-color var(--transition-fast);
 }

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NForm, NFormItem, NInput } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { mockLoginResponse } from '@/services/mock'
 
@@ -9,7 +8,6 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
-const formRef = ref()
 const loading = ref(false)
 const showPassword = ref(false)
 const formValue = ref({
@@ -17,28 +15,11 @@ const formValue = ref({
   password: ''
 })
 
+const emailFocused = ref(false)
+const passwordFocused = ref(false)
+
 const emailError = ref('')
 const passwordError = ref('')
-
-const isEmailValid = computed(() => {
-  if (!formValue.value.email) return false
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(formValue.value.email)
-})
-
-const isPasswordValid = computed(() => {
-  return formValue.value.password.length >= 6
-})
-
-const rules = {
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6个字符', trigger: 'blur' }
-  ]
-}
 
 function validateEmail() {
   if (!formValue.value.email) {
@@ -74,7 +55,6 @@ async function handleSubmit() {
   if (!emailValid || !passwordValid) return
   
   try {
-    await formRef.value?.validate()
     loading.value = true
 
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -89,76 +69,71 @@ async function handleSubmit() {
     loading.value = false
   }
 }
+
+function goHome() {
+  router.push('/')
+}
 </script>
 
 <template>
   <div class="login-page">
-    <div class="login-page__background">
-      <div class="login-page__gradient"></div>
-    </div>
-    
     <div class="login-page__content">
       <div class="login-card">
         <div class="login-card__header">
-          <div class="login-card__logo">
+          <div class="login-card__logo" @click="goHome">
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
             </svg>
           </div>
-          <h1 class="login-card__title">Anime Video</h1>
+          <h1 class="login-card__title" @click="goHome">Anime Video</h1>
           <p class="login-card__subtitle">登录您的账户</p>
         </div>
 
-        <NForm
-          ref="formRef"
-          :model="formValue"
-          :rules="rules"
-          class="login-card__form"
-        >
-          <NFormItem path="email" :show-label="false">
-            <div class="input-wrapper" :class="{ 'input-wrapper--error': emailError, 'input-wrapper--success': isEmailValid && !emailError }">
-              <span class="input-icon">
+        <form class="login-card__form" @submit.prevent="handleSubmit">
+          <div class="input-field">
+            <div class="input-field__wrapper" :class="{ 'input-field__wrapper--focused': emailFocused, 'input-field__wrapper--error': emailError }">
+              <span class="input-field__icon">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
               </span>
-              <NInput
-                v-model:value="formValue.email"
-                placeholder="请输入邮箱"
-                :bordered="false"
-                size="large"
-                @blur="validateEmail"
-                @input="emailError = ''"
-              />
-              <span v-if="isEmailValid && !emailError" class="input-status input-status--success">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
-              </span>
+              <div class="input-field__area">
+                <input
+                  v-model="formValue.email"
+                  type="text"
+                  class="input-field__input"
+                  placeholder="请输入邮箱"
+                  @focus="emailFocused = true"
+                  @blur="emailFocused = false; validateEmail()"
+                />
+                <div class="input-field__underline"></div>
+              </div>
             </div>
             <Transition name="error">
-              <p v-if="emailError" class="input-error">{{ emailError }}</p>
+              <p v-if="emailError" class="input-field__error">{{ emailError }}</p>
             </Transition>
-          </NFormItem>
+          </div>
 
-          <NFormItem path="password" :show-label="false">
-            <div class="input-wrapper" :class="{ 'input-wrapper--error': passwordError, 'input-wrapper--success': isPasswordValid && !passwordError }">
-              <span class="input-icon">
+          <div class="input-field">
+            <div class="input-field__wrapper" :class="{ 'input-field__wrapper--focused': passwordFocused, 'input-field__wrapper--error': passwordError }">
+              <span class="input-field__icon">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
                 </svg>
               </span>
-              <NInput
-                v-model:value="formValue.password"
-                placeholder="请输入密码"
-                :type="showPassword ? 'text' : 'password'"
-                :bordered="false"
-                size="large"
-                @blur="validatePassword"
-                @input="passwordError = ''"
-                @keyup.enter="handleSubmit"
-              />
-              <button type="button" class="input-toggle" @click="showPassword = !showPassword">
+              <div class="input-field__area">
+                <input
+                  v-model="formValue.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  class="input-field__input"
+                  placeholder="请输入密码"
+                  @focus="passwordFocused = true"
+                  @blur="passwordFocused = false; validatePassword()"
+                  @keyup.enter="handleSubmit"
+                />
+                <div class="input-field__underline"></div>
+              </div>
+              <button type="button" class="input-field__toggle" @click="showPassword = !showPassword">
                 <svg v-if="showPassword" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
                 </svg>
@@ -168,34 +143,36 @@ async function handleSubmit() {
               </button>
             </div>
             <Transition name="error">
-              <p v-if="passwordError" class="input-error">{{ passwordError }}</p>
+              <p v-if="passwordError" class="input-field__error">{{ passwordError }}</p>
             </Transition>
-          </NFormItem>
+          </div>
 
-          <NFormItem :show-label="false">
+          <div class="login-card__actions">
             <button
-              type="button"
+              type="submit"
               class="login-btn"
               :class="{ 'login-btn--loading': loading }"
               :disabled="loading"
-              @click="handleSubmit"
             >
               <span v-if="loading" class="login-btn__spinner"></span>
               <span v-else class="login-btn__text">登 录</span>
             </button>
-          </NFormItem>
-        </NForm>
+          </div>
+
+          <div class="login-card__links">
+            <a href="#" class="login-card__link" @click.prevent>忘记密码?</a>
+            <span class="login-card__divider">|</span>
+            <a href="#" class="login-card__link" @click.prevent>注册账户</a>
+          </div>
+        </form>
 
         <div class="login-card__footer">
-          <div class="login-card__divider">
-            <span>测试账户</span>
-          </div>
-          <p class="login-card__hint">
+          <div class="login-card__hint">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
             </svg>
-            user@example.com / 任意密码
-          </p>
+            <span>测试账户: user@example.com / 任意密码</span>
+          </div>
         </div>
       </div>
     </div>
@@ -210,33 +187,11 @@ async function handleSubmit() {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background-color: var(--bg-color);
 }
 
-.login-page__background {
-  position: absolute;
-  inset: 0;
-  background-color: var(--bg-secondary);
-}
-
-.login-page__gradient {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 30% 30%, var(--color-primary-light) 0%, transparent 50%),
-              radial-gradient(circle at 70% 70%, var(--color-primary-100) 0%, transparent 50%);
-  opacity: 0.5;
-  animation: gradientMove 20s ease-in-out infinite;
-}
-
-@keyframes gradientMove {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(-5%, -5%);
-  }
+.dark .login-page {
+  background-color: var(--bg-color);
 }
 
 .login-page__content {
@@ -282,6 +237,12 @@ async function handleSubmit() {
   justify-content: center;
   color: white;
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.login-card__logo:hover {
+  transform: scale(1.05);
 }
 
 .login-card__logo svg {
@@ -294,6 +255,12 @@ async function handleSubmit() {
   font-weight: 700;
   color: var(--text-color);
   margin-bottom: var(--spacing-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.login-card__title:hover {
+  color: var(--color-primary);
 }
 
 .login-card__subtitle {
@@ -307,75 +274,77 @@ async function handleSubmit() {
   gap: var(--spacing-lg);
 }
 
-.input-wrapper {
-  position: relative;
+.input-field {
   display: flex;
-  align-items: center;
-  background-color: var(--bg-secondary);
-  border: 2px solid transparent;
-  border-radius: var(--radius-lg);
-  transition: all var(--transition-fast);
+  flex-direction: column;
 }
 
-.input-wrapper:hover {
-  background-color: var(--bg-hover);
+.input-field__wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
 }
 
-.input-wrapper:focus-within {
-  background-color: var(--bg-color);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px var(--color-primary-light);
-}
-
-.input-wrapper--error {
-  border-color: var(--color-error);
-}
-
-.input-wrapper--error:focus-within {
-  box-shadow: 0 0 0 4px var(--color-error-light);
-}
-
-.input-wrapper--success {
-  border-color: var(--color-success);
-}
-
-.input-wrapper--success:focus-within {
-  box-shadow: 0 0 0 4px var(--color-success-light);
-}
-
-.input-icon {
+.input-field__icon {
+  padding-top: 10px;
   width: 20px;
   height: 20px;
-  margin-left: var(--spacing-md);
   color: var(--text-muted);
   flex-shrink: 0;
+  transition: color var(--transition-fast);
 }
 
-.input-icon svg {
+.input-field__icon svg {
   width: 100%;
   height: 100%;
 }
 
-.input-status {
-  width: 20px;
-  height: 20px;
-  margin-right: var(--spacing-md);
-  flex-shrink: 0;
+.input-field__wrapper--focused .input-field__icon {
+  color: var(--color-primary);
 }
 
-.input-status--success {
-  color: var(--color-success);
+.input-field__wrapper--error .input-field__icon {
+  color: var(--color-error);
 }
 
-.input-status svg {
+.input-field__area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-field__input {
   width: 100%;
-  height: 100%;
+  padding: var(--spacing-sm) 0;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
-.input-toggle {
-  width: 36px;
-  height: 36px;
-  margin-right: var(--spacing-sm);
+.input-field__input::placeholder {
+  color: var(--text-muted);
+}
+
+.input-field__underline {
+  height: 2px;
+  background-color: var(--border-color);
+  transition: background-color var(--transition-fast);
+}
+
+.input-field__wrapper--focused .input-field__underline {
+  background-color: var(--color-primary);
+}
+
+.input-field__wrapper--error .input-field__underline {
+  background-color: var(--color-error);
+}
+
+.input-field__toggle {
+  padding-top: 6px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,23 +352,24 @@ async function handleSubmit() {
   cursor: pointer;
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.input-toggle:hover {
+.input-field__toggle:hover {
   color: var(--text-color);
   background-color: var(--bg-hover);
 }
 
-.input-toggle svg {
+.input-field__toggle svg {
   width: 20px;
   height: 20px;
 }
 
-.input-error {
+.input-field__error {
   font-size: var(--font-size-sm);
   color: var(--color-error);
   margin-top: var(--spacing-xs);
-  padding-left: var(--spacing-md);
+  padding-left: calc(20px + var(--spacing-md));
 }
 
 .error-enter-active,
@@ -411,6 +381,10 @@ async function handleSubmit() {
 .error-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+.login-card__actions {
+  margin-top: var(--spacing-sm);
 }
 
 .login-btn {
@@ -462,29 +436,33 @@ async function handleSubmit() {
   }
 }
 
-.login-card__footer {
-  margin-top: var(--spacing-xl);
-  text-align: center;
+.login-card__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.login-card__link {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.login-card__link:hover {
+  color: var(--color-primary-hover);
 }
 
 .login-card__divider {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.login-card__divider::before,
-.login-card__divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background-color: var(--border-color);
-}
-
-.login-card__divider span {
-  font-size: var(--font-size-sm);
   color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.login-card__footer {
+  margin-top: var(--spacing-xl);
+  text-align: center;
 }
 
 .login-card__hint {
