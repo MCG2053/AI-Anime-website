@@ -3,33 +3,34 @@
     <div class="week-schedule__header">
       <h2 class="week-schedule__title">番剧更新表</h2>
       <div class="week-schedule__nav">
-        <button 
-          v-for="day in weekDays" 
-          :key="day.day"
-          :class="['week-schedule__day-btn', { 
-            'week-schedule__day-btn--active': selectedDay === day.day,
-            'week-schedule__day-btn--today': day.day === todayDay
-          }]"
-          @click="selectDay(day.day)"
-        >
-          <span class="week-schedule__day-name">{{ day.dayName }}</span>
-          <span class="week-schedule__day-count" v-if="day.videos.length">{{ day.videos.length }}</span>
-        </button>
+        <div class="week-schedule__nav-inner">
+          <button 
+            v-for="day in weekDays" 
+            :key="day.day"
+            :ref="el => { if (el) buttonRefs[day.day] = el as HTMLElement }"
+            :class="['week-schedule__day-btn', { 
+              'week-schedule__day-btn--active': selectedDay === day.day
+            }]"
+            @click="selectDay(day.day)"
+          >
+            <span class="week-schedule__day-name">
+              {{ day.dayName }}
+              <svg v-if="day.day === todayDay" class="week-schedule__today-star" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+            </span>
+            <span class="week-schedule__day-count" v-if="day.videos.length">{{ day.videos.length }}</span>
+          </button>
+          <div class="week-schedule__indicator" :style="indicatorStyle"></div>
+        </div>
       </div>
     </div>
 
     <NSpin :show="loading">
       <div class="week-schedule__content">
-        <div 
-          :class="['week-schedule__section', { 'week-schedule__section--today': currentDay.day === todayDay }]"
-        >
+        <div class="week-schedule__section">
           <div class="week-schedule__section-header">
             <h3 class="week-schedule__section-title">
-              <span class="week-schedule__section-icon" v-if="currentDay.day === todayDay">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                </svg>
-              </span>
               {{ currentDay.dayName }}
               <span class="week-schedule__today-badge" v-if="currentDay.day === todayDay">今天</span>
             </h3>
@@ -76,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { NSpin } from 'naive-ui'
 import type { WeekSchedule } from '@/stores/video'
 
@@ -86,6 +87,8 @@ const props = defineProps<{
 }>()
 
 const selectedDay = ref('')
+const buttonRefs = ref<Record<string, HTMLElement>>({})
+const indicatorStyle = ref({ left: '0px', width: '0px' })
 
 const weekDays = computed(() => {
   const order = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
@@ -121,30 +124,41 @@ function getDayName(day: string): string {
   return dayNames[day] || day
 }
 
+function updateIndicator() {
+  nextTick(() => {
+    const activeBtn = buttonRefs.value[selectedDay.value]
+    if (activeBtn) {
+      indicatorStyle.value = {
+        left: `${activeBtn.offsetLeft}px`,
+        width: `${activeBtn.offsetWidth}px`
+      }
+    }
+  })
+}
+
 function selectDay(day: string) {
   selectedDay.value = day
+  updateIndicator()
 }
+
+watch(selectedDay, updateIndicator)
 
 onMounted(() => {
   selectedDay.value = todayDay.value
+  updateIndicator()
 })
 </script>
 
 <style scoped>
 .week-schedule {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-color);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .week-schedule__header {
   padding: var(--spacing-lg);
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--bg-primary) 100%);
   border-bottom: 1px solid var(--border-color);
-}
-
-.dark .week-schedule__header {
-  background: linear-gradient(135deg, var(--color-primary-900) 0%, var(--bg-primary) 100%);
 }
 
 .week-schedule__title {
@@ -155,8 +169,6 @@ onMounted(() => {
 }
 
 .week-schedule__nav {
-  display: flex;
-  gap: var(--spacing-xs);
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -166,43 +178,49 @@ onMounted(() => {
   display: none;
 }
 
+.week-schedule__nav-inner {
+  display: flex;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
 .week-schedule__day-btn {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--text-secondary);
-  background-color: var(--bg-secondary);
+  background-color: transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color var(--transition-fast);
   white-space: nowrap;
-  border: 2px solid transparent;
+  position: relative;
 }
 
 .week-schedule__day-btn:hover {
   color: var(--text-color);
-  background-color: var(--bg-hover);
-}
-
-.week-schedule__day-btn--today {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
 }
 
 .week-schedule__day-btn--active {
-  background-color: var(--color-primary);
-  color: white;
+  color: var(--color-primary);
 }
 
-.week-schedule__day-btn--active.week-schedule__day-btn--today {
-  border-color: transparent;
+.week-schedule__day-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.week-schedule__today-star {
+  width: 14px;
+  height: 14px;
+  color: #fbbf24;
 }
 
 .week-schedule__day-count {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-secondary);
   color: var(--text-secondary);
   font-size: var(--font-size-xs);
   padding: 2px 6px;
@@ -212,8 +230,17 @@ onMounted(() => {
 }
 
 .week-schedule__day-btn--active .week-schedule__day-count {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--color-primary);
   color: white;
+}
+
+.week-schedule__indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-normal);
 }
 
 .week-schedule__content {
@@ -224,12 +251,6 @@ onMounted(() => {
   padding: var(--spacing-md);
   border-radius: var(--radius-lg);
   background-color: var(--bg-secondary);
-  transition: all var(--transition-normal);
-}
-
-.week-schedule__section--today {
-  background-color: var(--bg-secondary);
-  border: 2px solid var(--color-primary);
 }
 
 .week-schedule__section-header {
@@ -250,19 +271,8 @@ onMounted(() => {
   color: var(--text-color);
 }
 
-.week-schedule__section-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--color-primary);
-}
-
-.week-schedule__section-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
 .week-schedule__today-badge {
-  background-color: var(--color-primary);
+  background-color: #fbbf24;
   color: white;
   font-size: var(--font-size-xs);
   padding: 2px 8px;

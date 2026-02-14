@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="`/video/${video.id}`" class="video-card card card-hover group">
+  <router-link :to="`/bangumi/${video.id}`" class="video-card card card-hover group">
     <div class="video-card__cover">
       <img
         :src="video.cover"

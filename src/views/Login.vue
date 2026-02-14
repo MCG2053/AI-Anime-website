@@ -80,12 +80,7 @@ function goHome() {
     <div class="login-page__content">
       <div class="login-card">
         <div class="login-card__header">
-          <div class="login-card__logo" @click="goHome">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
-            </svg>
-          </div>
-          <h1 class="login-card__title" @click="goHome">Anime Video</h1>
+          <h1 class="login-card__title" @click="goHome">AnimeVideo</h1>
           <p class="login-card__subtitle">登录您的账户</p>
         </div>
 
@@ -226,41 +221,20 @@ function goHome() {
   margin-bottom: var(--spacing-xl);
 }
 
-.login-card__logo {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto var(--spacing-md);
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-  cursor: pointer;
-  transition: transform var(--transition-fast);
-}
-
-.login-card__logo:hover {
-  transform: scale(1.05);
-}
-
-.login-card__logo svg {
-  width: 32px;
-  height: 32px;
-}
-
 .login-card__title {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--text-color);
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: var(--spacing-xs);
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: opacity var(--transition-fast);
 }
 
 .login-card__title:hover {
-  color: var(--color-primary);
+  opacity: 0.9;
 }
 
 .login-card__subtitle {

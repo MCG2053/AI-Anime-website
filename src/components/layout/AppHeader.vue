@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NDropdown, NAvatar } from 'naive-ui'
+import { NAvatar } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { useVideoStore } from '@/stores/video'
 import ThemeToggle from '@/components/theme/ThemeToggle.vue'
@@ -11,22 +11,8 @@ const route = useRoute()
 const userStore = useUserStore()
 const videoStore = useVideoStore()
 
-const searchKeyword = ref('')
-const searchFocused = ref(false)
-const searchExpanded = ref(false)
-const searchInputRef = ref<any>(null)
 const tabRefs = ref<Record<string, HTMLElement>>({})
 const indicatorStyle = ref({ left: '0px', width: '0px' })
-
-const hotSearchTags = ['进击的巨人', '鬼灭之刃', '咒术回战', '间谍过家家', '我的英雄学院', '海贼王', '一拳超人', '刀剑神域']
-
-const searchSuggestions = computed(() => {
-  if (!searchKeyword.value.trim()) return []
-  const keyword = searchKeyword.value.toLowerCase()
-  return hotSearchTags.filter(tag => 
-    tag.toLowerCase().includes(keyword)
-  ).slice(0, 5)
-})
 
 const currentCategory = computed({
   get: () => videoStore.currentCategory,
@@ -56,34 +42,13 @@ function handleCategoryClick(slug: string) {
     currentCategory.value = slug
     updateIndicator()
   }
-}
-
-function handleSearch() {
-  if (searchKeyword.value.trim()) {
-    router.push({ name: 'Search', query: { q: searchKeyword.value.trim() } })
-    closeSearch()
+  if (route.name !== 'Home') {
+    router.push({ name: 'Home' })
   }
 }
 
-function handleSuggestionClick(suggestion: string) {
-  searchKeyword.value = suggestion
-  handleSearch()
-}
-
-function openSearch() {
-  searchExpanded.value = true
-  document.body.style.overflow = 'hidden'
-  setTimeout(() => {
-    if (searchInputRef.value) {
-      searchInputRef.value.focus()
-    }
-  }, 100)
-}
-
-function closeSearch() {
-  searchExpanded.value = false
-  searchKeyword.value = ''
-  document.body.style.overflow = ''
+function goToSearch() {
+  router.push({ name: 'Search' })
 }
 
 function handleLogout() {
@@ -91,51 +56,11 @@ function handleLogout() {
   router.push({ name: 'Home' })
 }
 
-const userDropdownOptions = [
-  { label: '个人中心', key: 'profile' },
-  { label: '我的收藏', key: 'favorites' },
-  { label: '观看历史', key: 'history' },
-  { type: 'divider', key: 'd1' },
-  { label: '退出登录', key: 'logout' }
-]
-
-function handleUserDropdown(key: string) {
-  switch (key) {
-    case 'profile':
-      router.push('/user')
-      break
-    case 'favorites':
-      router.push('/user?tab=favorites')
-      break
-    case 'history':
-      router.push('/user?tab=history')
-      break
-    case 'logout':
-      handleLogout()
-      break
-  }
+function goToUserCenter() {
+  router.push('/user')
 }
-
-watch(searchExpanded, (val) => {
-  if (val) {
-    document.addEventListener('keydown', handleEscKey)
-  } else {
-    document.removeEventListener('keydown', handleEscKey)
-  }
-})
 
 watch(currentCategory, updateIndicator)
-
-function handleEscKey(e: KeyboardEvent) {
-  if (e.key === 'Escape') {
-    closeSearch()
-  }
-}
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscKey)
-  document.body.style.overflow = ''
-})
 </script>
 
 <template>
@@ -144,16 +69,11 @@ onUnmounted(() => {
       <div class="app-header__container">
         <div class="app-header__left">
           <router-link to="/" class="app-header__logo">
-            <div class="logo-icon">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
-              </svg>
-            </div>
-            <span class="logo-text">Anime Video</span>
+            <span class="logo-text">AnimeVideo</span>
           </router-link>
         </div>
 
-        <div class="app-header__center" v-if="isHome">
+        <div class="app-header__center">
           <div class="nav-tabs">
             <button
               v-for="category in videoStore.categories"
@@ -172,7 +92,7 @@ onUnmounted(() => {
           <div 
             v-if="!isSearchPage"
             class="search-box" 
-            @click="openSearch"
+            @click="goToSearch"
           >
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -182,21 +102,15 @@ onUnmounted(() => {
           <ThemeToggle />
 
           <template v-if="userStore.isLoggedIn">
-            <NDropdown
-              :options="userDropdownOptions"
-              @select="handleUserDropdown"
-              placement="bottom-end"
-              :show-arrow="true"
-            >
-              <div class="user-avatar">
-                <NAvatar
-                  round
-                  :src="userStore.avatar"
-                  :alt="userStore.username"
-                  size="small"
-                />
-              </div>
-            </NDropdown>
+            <div class="user-avatar" @click="goToUserCenter">
+              <NAvatar
+                round
+                :src="userStore.avatar"
+                :alt="userStore.username"
+                size="small"
+              />
+            </div>
+            <span class="logout-text" @click="handleLogout">退出登录</span>
           </template>
           <template v-else>
             <button class="login-btn" @click="router.push('/login')">
@@ -206,59 +120,6 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-
-    <Teleport to="body">
-      <Transition name="search-overlay">
-        <div 
-          v-if="searchExpanded" 
-          class="search-overlay"
-          @click.self="closeSearch"
-        >
-          <div class="search-modal">
-            <div class="search-modal__input-wrapper" :class="{ 'search-modal__input-wrapper--focused': searchFocused }">
-              <svg class="search-modal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <input
-                ref="searchInputRef"
-                v-model="searchKeyword"
-                type="text"
-                class="search-modal__input"
-                placeholder="搜索动漫..."
-                @focus="searchFocused = true"
-                @blur="searchFocused = false"
-                @keyup.enter="handleSearch"
-              />
-              <button 
-                v-if="searchKeyword" 
-                class="search-modal__clear"
-                @click="searchKeyword = ''"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
-            </div>
-            
-            <Transition name="dropdown">
-              <div class="search-modal__dropdown" v-if="searchKeyword && searchSuggestions.length > 0">
-                <button 
-                  v-for="suggestion in searchSuggestions" 
-                  :key="suggestion"
-                  class="search-modal__suggestion"
-                  @click="handleSuggestionClick(suggestion)"
-                >
-                  <svg class="search-modal__suggestion-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                  </svg>
-                  <span class="search-modal__suggestion-text">{{ suggestion }}</span>
-                </button>
-              </div>
-            </Transition>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
   </header>
 </template>
 
@@ -289,7 +150,7 @@ onUnmounted(() => {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
-  height: 56px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -304,7 +165,6 @@ onUnmounted(() => {
 .app-header__logo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
   text-decoration: none;
   transition: transform var(--transition-fast);
 }
@@ -313,27 +173,13 @@ onUnmounted(() => {
   transform: scale(1.02);
 }
 
-.logo-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-}
-
-.logo-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
 .logo-text {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   white-space: nowrap;
 }
 
@@ -367,7 +213,10 @@ onUnmounted(() => {
 }
 
 .nav-tabs__item--active {
-  color: var(--color-primary);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .nav-tabs__label {
@@ -378,7 +227,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 0;
   height: 2px;
-  background: var(--color-primary);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   border-radius: var(--radius-full);
   transition: all var(--transition-normal);
 }
@@ -422,28 +271,36 @@ onUnmounted(() => {
   background-color: var(--bg-hover);
 }
 
+.logout-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.logout-text:hover {
+  color: #ef4444;
+}
+
 .login-btn {
   padding: var(--spacing-xs) var(--spacing-md);
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   color: white;
   font-size: var(--font-size-sm);
   font-weight: 500;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .login-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 @media (max-width: 768px) {
-  .logo-text {
-    display: none;
-  }
-
   .app-header__center {
     display: none;
   }
@@ -452,152 +309,5 @@ onUnmounted(() => {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-xs);
   }
-}
-
-.search-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-  z-index: var(--z-modal);
-  display: flex;
-  justify-content: center;
-  padding-top: 20vh;
-}
-
-.dark .search-overlay {
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-.search-modal {
-  width: 100%;
-  max-width: 500px;
-  background-color: var(--bg-color);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  overflow: hidden;
-  margin: 0 var(--spacing-md);
-}
-
-.search-modal__input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.search-modal__input-wrapper--focused {
-  border-bottom-color: var(--color-primary);
-}
-
-.search-modal__icon {
-  width: 20px;
-  height: 20px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.search-modal__input {
-  flex: 1;
-  padding: var(--spacing-sm) 0;
-  font-size: var(--font-size-base);
-  color: var(--text-color);
-  background: transparent;
-  border: none;
-  outline: none;
-}
-
-.search-modal__input::placeholder {
-  color: var(--text-muted);
-}
-
-.search-modal__clear {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
-}
-
-.search-modal__clear:hover {
-  color: var(--text-color);
-  background-color: var(--bg-hover);
-}
-
-.search-modal__clear svg {
-  width: 16px;
-  height: 16px;
-}
-
-.search-modal__dropdown {
-  background-color: var(--bg-color);
-  max-height: 280px;
-  overflow-y: auto;
-}
-
-.search-modal__suggestion {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  text-align: left;
-  transition: background-color var(--transition-fast);
-}
-
-.search-modal__suggestion:hover {
-  background-color: var(--bg-hover);
-}
-
-.search-modal__suggestion-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.search-modal__suggestion-text {
-  font-size: var(--font-size-sm);
-  color: var(--text-color);
-}
-
-.search-overlay-enter-active,
-.search-overlay-leave-active {
-  transition: all var(--transition-normal);
-}
-
-.search-overlay-enter-active .search-modal,
-.search-overlay-leave-active .search-modal {
-  transition: all var(--transition-normal);
-}
-
-.search-overlay-enter-from,
-.search-overlay-leave-to {
-  opacity: 0;
-}
-
-.search-overlay-enter-from .search-modal,
-.search-overlay-leave-to .search-modal {
-  transform: translateY(-20px) scale(0.95);
-  opacity: 0;
-}
-
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition: all var(--transition-fast);
-}
-
-.dropdown-enter-from,
-.dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
 }
 </style>

@@ -25,12 +25,7 @@ const aboutLinks = [
     <div class="app-footer__container">
       <div class="app-footer__content">
         <div class="footer-brand">
-          <div class="footer-brand__logo">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 4a2 2 0 012-2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm6 4v8l6-4-6-4z"/>
-            </svg>
-          </div>
-          <h3 class="footer-brand__title">Anime Video</h3>
+          <h3 class="footer-brand__title">AnimeVideo</h3>
           <p class="footer-brand__desc">
             专注于动漫视频播放的平台，提供高清流畅的观看体验。
           </p>
@@ -67,7 +62,7 @@ const aboutLinks = [
       </div>
 
       <div class="app-footer__bottom">
-        <p class="copyright">&copy; {{ currentYear }} Anime Video. All rights reserved.</p>
+        <p class="copyright">&copy; {{ currentYear }} AnimeVideo. All rights reserved.</p>
         <div class="social-links">
           <a href="#" class="social-link" title="GitHub">
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -119,28 +114,13 @@ const aboutLinks = [
   max-width: 300px;
 }
 
-.footer-brand__logo {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  margin-bottom: var(--spacing-md);
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
-}
-
-.footer-brand__logo svg {
-  width: 22px;
-  height: 22px;
-}
-
 .footer-brand__title {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--text-color);
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: var(--spacing-sm);
 }
 

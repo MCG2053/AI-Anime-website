@@ -15,10 +15,22 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '登录', guest: true }
   },
   {
+    path: '/bangumi/:id',
+    name: 'BangumiDetail',
+    component: () => import('@/views/BangumiDetail.vue'),
+    meta: { title: '番剧详情' }
+  },
+  {
+    path: '/watch/:id/:episode?',
+    name: 'Watch',
+    component: () => import('@/views/Watch.vue'),
+    meta: { title: '播放' }
+  },
+  {
     path: '/video/:id',
-    name: 'VideoDetail',
-    component: () => import('@/views/VideoDetail.vue'),
-    meta: { title: '视频详情' }
+    redirect: to => {
+      return `/bangumi/${to.params.id}`
+    }
   },
   {
     path: '/search',
@@ -52,7 +64,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
-  document.title = `${to.meta.title || '首页'} - Anime Video`
+  document.title = `${to.meta.title || '首页'} - AnimeVideo`
 
   const userStore = useUserStore()
 
