@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="video-card__content">
-      <h3 class="video-card__title line-clamp-2" :title="video.title">
+      <h3 class="video-card__title" :title="video.title">
         {{ video.title }}
       </h3>
       <div class="video-card__meta">
@@ -174,7 +174,12 @@ const formatDuration = (seconds: number): string => {
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--text-color);
-  line-height: var(--line-height-normal);
+  line-height: 1.4;
+  height: 2.8em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   transition: color var(--transition-fast);
 }
 
@@ -191,6 +196,7 @@ const formatDuration = (seconds: number): string => {
   justify-content: space-between;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+  min-height: 20px;
 }
 
 .video-card__views {
@@ -207,6 +213,8 @@ const formatDuration = (seconds: number): string => {
   display: flex;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
+  min-height: 22px;
+  margin-top: auto;
 }
 
 .video-card__tags .tag {
