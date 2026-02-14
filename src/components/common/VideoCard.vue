@@ -1,54 +1,116 @@
 <template>
-  <router-link :to="`/bangumi/${video.id}`" class="video-card card card-hover group">
-    <div class="video-card__cover">
-      <img
-        :src="video.cover"
-        :alt="video.title"
-        class="video-card__image"
-        loading="lazy"
-      />
-      <div class="video-card__overlay">
-        <div class="video-card__play">
-          <svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
+  <router-link 
+    :to="`/bangumi/${video.id}`" 
+    class="video-card"
+    ref="cardRef"
+    @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave"
+  >
+    <div class="video-card__shine" :style="shineStyle"></div>
+    <div class="video-card__inner" :style="cardStyle">
+      <div class="video-card__cover">
+        <img
+          :src="video.cover"
+          :alt="video.title"
+          class="video-card__image"
+          loading="lazy"
+        />
+        <div class="video-card__overlay">
+          <div class="video-card__play">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </div>
+        </div>
+        <div v-if="video.updateInfo" class="video-card__badge">
+          {{ video.updateInfo }}
+        </div>
+        <div class="video-card__duration" v-if="video.duration">
+          {{ formatDuration(video.duration) }}
         </div>
       </div>
-      <div v-if="video.updateInfo" class="video-card__badge">
-        {{ video.updateInfo }}
-      </div>
-      <div class="video-card__duration" v-if="video.duration">
-        {{ formatDuration(video.duration) }}
-      </div>
-    </div>
-    <div class="video-card__content">
-      <h3 class="video-card__title" :title="video.title">
-        {{ video.title }}
-      </h3>
-      <div class="video-card__meta">
-        <span class="video-card__views">
-          <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-          </svg>
-          {{ formatViews(video.views) }}
-        </span>
-        <span class="video-card__year">{{ video.year }}</span>
-      </div>
-      <div v-if="video.tags && video.tags.length" class="video-card__tags">
-        <span v-for="tag in video.tags.slice(0, 2)" :key="tag" class="tag tag-primary">
-          {{ tag }}
-        </span>
+      <div class="video-card__content">
+        <h3 class="video-card__title" :title="video.title">
+          {{ video.title }}
+        </h3>
+        <div class="video-card__meta">
+          <span class="video-card__views">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+            {{ formatViews(video.views) }}
+          </span>
+          <span class="video-card__year">{{ video.year }}</span>
+        </div>
+        <div v-if="video.tags && video.tags.length" class="video-card__tags">
+          <span v-for="tag in video.tags.slice(0, 2)" :key="tag" class="tag tag-primary">
+            {{ tag }}
+          </span>
+        </div>
       </div>
     </div>
   </router-link>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import type { Video } from '@/types'
 
 defineProps<{
   video: Video
 }>()
+
+const cardRef = ref<HTMLElement | null>(null)
+const isHovering = ref(false)
+const mouseX = ref(0.5)
+const mouseY = ref(0.5)
+
+const cardStyle = computed(() => {
+  if (!isHovering.value) {
+    return {
+      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)'
+    }
+  }
+  
+  const rotateX = (mouseY.value - 0.5) * -15
+  const rotateY = (mouseX.value - 0.5) * 15
+  
+  return {
+    transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
+  }
+})
+
+const shineStyle = computed(() => {
+  if (!isHovering.value) {
+    return {
+      opacity: '0',
+      background: 'linear-gradient(135deg, transparent 0%, transparent 100%)'
+    }
+  }
+  
+  const shineX = mouseX.value * 100
+  const shineY = mouseY.value * 100
+  
+  return {
+    opacity: '1',
+    background: `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255, 255, 255, 0.25) 0%, transparent 50%)`
+  }
+})
+
+function handleMouseMove(e: MouseEvent) {
+  if (!cardRef.value) return
+  
+  isHovering.value = true
+  const rect = cardRef.value.getBoundingClientRect()
+  mouseX.value = (e.clientX - rect.left) / rect.width
+  mouseY.value = (e.clientY - rect.top) / rect.height
+}
+
+function handleMouseLeave() {
+  isHovering.value = false
+  mouseX.value = 0.5
+  mouseY.value = 0.5
+}
 
 const formatViews = (views?: number): string => {
   if (!views) return '0'
@@ -67,13 +129,31 @@ const formatDuration = (seconds: number): string => {
 
 <style scoped>
 .video-card {
-  display: flex;
-  flex-direction: column;
+  display: block;
   height: 100%;
-  background-color: var(--bg-card);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
+  position: relative;
+  background-color: var(--bg-card);
+}
+
+.video-card__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: var(--radius-lg);
+}
+
+.video-card__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
 }
 
 .video-card__cover {
@@ -122,7 +202,7 @@ const formatDuration = (seconds: number): string => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary);
+  color: #3b82f6;
   transform: scale(0.8);
   opacity: 0;
   transition: all var(--transition-normal);
@@ -173,18 +253,18 @@ const formatDuration = (seconds: number): string => {
 .video-card__title {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--text-color);
+  color: white;
   line-height: 1.4;
   height: 2.8em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .video-card:hover .video-card__title {
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -195,8 +275,9 @@ const formatDuration = (seconds: number): string => {
   align-items: center;
   justify-content: space-between;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   min-height: 20px;
+  transition: color var(--transition-fast);
 }
 
 .video-card__views {
@@ -221,8 +302,12 @@ const formatDuration = (seconds: number): string => {
   font-size: 0.8125rem;
   font-weight: 700;
   padding: 2px 8px;
-  background-color: var(--bg-color);
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: white;
+  transition: all var(--transition-fast);
+}
+
+.video-card:hover .video-card__tags .tag {
+  background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
