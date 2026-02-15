@@ -517,11 +517,23 @@ onMounted(loadVideo)
   }
 
   .watch-page__sidebar {
-    order: -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
   }
 
   .watch-page__detail-card {
     display: none;
+  }
+
+  .watch-page__related {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .watch-page__sidebar {
+    grid-template-columns: 1fr;
   }
 }
 
