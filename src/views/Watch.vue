@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NSpin, NButton } from 'naive-ui'
+import { NSpin } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
+import { useAnimeListStore } from '@/stores/animeList'
 import VideoPlayer from '@/components/video/VideoPlayer.vue'
-import DanmakuSender from '@/components/video/DanmakuSender.vue'
 import CommentSection from '@/components/video/CommentSection.vue'
-import { generateMockVideoDetail, generateMockDanmaku, mockComments, generateMockVideos } from '@/services/mock'
-import type { VideoDetail, Danmaku, Comment } from '@/types'
+import { generateMockVideoDetail, mockComments, generateMockVideos } from '@/services/mock'
+import type { VideoDetail, Comment } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const animeListStore = useAnimeListStore()
 
 const loading = ref(true)
 const video = ref<VideoDetail | null>(null)
 const comments = ref<Comment[]>(mockComments)
-const danmakuList = ref<Danmaku[]>([])
 const currentTime = ref(0)
 const relatedVideos = ref<any[]>([])
 
@@ -28,23 +28,16 @@ const currentEpisode = computed(() => {
   return video.value.episodes.find(e => e.id === episodeId.value) || video.value.episodes[0]
 })
 
+const animeStatus = computed(() => {
+  if (!video.value) return null
+  return animeListStore.getAnimeStatus(video.value.id)
+})
+
+const isWatching = computed(() => animeStatus.value === 'watching')
+const isCompleted = computed(() => animeStatus.value === 'completed')
+
 function handleTimeUpdate(time: number) {
   currentTime.value = time
-}
-
-function handleDanmakuSend(danmaku: { content: string; color: string; type: string }) {
-  if (!userStore.isLoggedIn) return
-
-  const newDanmaku: Danmaku = {
-    id: Date.now(),
-    content: danmaku.content,
-    time: currentTime.value,
-    color: danmaku.color,
-    type: danmaku.type as 'scroll' | 'top' | 'bottom',
-    userId: userStore.user!.id,
-    createdAt: new Date().toISOString()
-  }
-  danmakuList.value.push(newDanmaku)
 }
 
 function handleCommentSubmit(content: string) {
@@ -73,12 +66,32 @@ function handleEpisodeClick(epId: number) {
   router.push(`/watch/${video.value?.id}/${epId}`)
 }
 
-function handleLike() {
-  console.log('Like video:', videoId.value)
+async function handleWatching() {
+  if (!video.value) return
+  if (!userStore.isLoggedIn) {
+    console.log('Please login first')
+    return
+  }
+  
+  if (isWatching.value) {
+    await animeListStore.removeAnime(video.value.id)
+  } else {
+    await animeListStore.addToWatching(video.value)
+  }
 }
 
-function handleCollect() {
-  console.log('Collect video:', videoId.value)
+async function handleCompleted() {
+  if (!video.value) return
+  if (!userStore.isLoggedIn) {
+    console.log('Please login first')
+    return
+  }
+  
+  if (isCompleted.value) {
+    await animeListStore.removeAnime(video.value.id)
+  } else {
+    await animeListStore.addToCompleted(video.value)
+  }
 }
 
 function goToDetail() {
@@ -89,7 +102,6 @@ function loadVideo() {
   loading.value = true
   setTimeout(() => {
     video.value = generateMockVideoDetail(videoId.value)
-    danmakuList.value = generateMockDanmaku(50)
     relatedVideos.value = generateMockVideos(6)
     loading.value = false
   }, 500)
@@ -120,29 +132,26 @@ onMounted(loadVideo)
                 <span class="watch-page__episode" v-if="currentEpisode">{{ currentEpisode.title }}</span>
               </div>
               <div class="watch-page__actions">
-                <NButton size="small" @click="handleLike">
-                  <template #icon>
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                  </template>
-                  {{ video.likeCount }}
-                </NButton>
-                <NButton size="small" @click="handleCollect">
-                  <template #icon>
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
-                    </svg>
-                  </template>
-                  {{ video.collectCount }}
-                </NButton>
+                <button 
+                  :class="['watch-page__action-btn', { 'watch-page__action-btn--active': isWatching }]" 
+                  @click="handleWatching"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  正在追
+                </button>
+                <button 
+                  :class="['watch-page__action-btn', { 'watch-page__action-btn--active': isCompleted }]" 
+                  @click="handleCompleted"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  已追完
+                </button>
               </div>
             </div>
-
-            <DanmakuSender
-              :current-time="currentTime"
-              @send="handleDanmakuSend"
-            />
 
             <div class="watch-page__episodes">
               <h3 class="watch-page__section-title">选集</h3>
@@ -252,12 +261,17 @@ onMounted(loadVideo)
 .watch-page__header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--spacing-md);
+  align-items: center;
+  gap: var(--spacing-lg);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
 }
 
 .watch-page__title-area {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .watch-page__title {
@@ -266,6 +280,7 @@ onMounted(loadVideo)
   color: var(--text-color);
   cursor: pointer;
   transition: color var(--transition-fast);
+  margin: 0;
 }
 
 .watch-page__title:hover {
@@ -274,8 +289,7 @@ onMounted(loadVideo)
 
 .watch-page__episode {
   display: inline-block;
-  margin-left: var(--spacing-sm);
-  padding: 2px 8px;
+  padding: 4px 10px;
   font-size: var(--font-size-sm);
   color: var(--color-primary);
   background-color: var(--color-primary-light);
@@ -285,6 +299,44 @@ onMounted(loadVideo)
 .watch-page__actions {
   display: flex;
   gap: var(--spacing-sm);
+}
+
+.watch-page__action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.watch-page__action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.watch-page__action-btn:hover {
+  color: var(--text-color);
+  background-color: var(--bg-hover);
+  border-color: var(--color-primary);
+}
+
+.watch-page__action-btn--active {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+  color: #ec4899;
+  border-color: #ec4899;
+}
+
+.watch-page__action-btn--active:hover {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%);
+  color: #ec4899;
+  border-color: #ec4899;
 }
 
 .watch-page__section-title {
@@ -476,6 +528,7 @@ onMounted(loadVideo)
 @media (max-width: 640px) {
   .watch-page__header {
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .watch-page__actions {

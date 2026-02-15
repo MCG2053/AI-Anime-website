@@ -158,7 +158,7 @@ onMounted(() => {
 
 .week-schedule__header {
   padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-strong);
 }
 
 .week-schedule__title {
@@ -237,7 +237,7 @@ onMounted(() => {
 .week-schedule__indicator {
   position: absolute;
   bottom: 0;
-  height: 2px;
+  height: 3px;
   background: var(--color-primary);
   border-radius: var(--radius-full);
   transition: all var(--transition-normal);
@@ -259,7 +259,7 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-sm);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-strong);
 }
 
 .week-schedule__section-title {
@@ -281,7 +281,7 @@ onMounted(() => {
 
 .week-schedule__section-count {
   font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
+  color: var(--text-muted);
 }
 
 .week-schedule__grid {
@@ -294,7 +294,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-md);
-  background-color: var(--bg-primary);
+  background-color: var(--bg-card);
   overflow: hidden;
   transition: all var(--transition-fast);
 }
@@ -356,7 +356,7 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
+  color: var(--text-muted);
 }
 
 .schedule-card__time svg {
@@ -370,7 +370,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl);
-  color: var(--text-tertiary);
+  color: var(--text-muted);
 }
 
 .week-schedule__empty-icon {

@@ -302,7 +302,7 @@ function goHome() {
 }
 
 .input-field__underline {
-  height: 2px;
+  height: 3px;
   background-color: var(--border-color);
   transition: background-color var(--transition-fast);
 }

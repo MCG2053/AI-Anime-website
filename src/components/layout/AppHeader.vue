@@ -129,13 +129,12 @@ watch(currentCategory, updateIndicator)
   top: 0;
   z-index: var(--z-sticky);
   background-color: var(--bg-color);
-  border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(12px);
-  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+  transition: background-color var(--transition-normal);
 }
 
 .dark .app-header {
-  background-color: rgba(18, 18, 18, 0.9);
+  background-color: var(--bg-color);
 }
 
 .app-header--home {
@@ -143,7 +142,7 @@ watch(currentCategory, updateIndicator)
 }
 
 .app-header__main {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: none;
 }
 
 .app-header__container {
@@ -226,7 +225,7 @@ watch(currentCategory, updateIndicator)
 .nav-tabs__indicator {
   position: absolute;
   bottom: 0;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   border-radius: var(--radius-full);
   transition: all var(--transition-normal);
@@ -236,6 +235,7 @@ watch(currentCategory, updateIndicator)
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  height: 100%;
 }
 
 .search-box {
@@ -244,7 +244,7 @@ watch(currentCategory, updateIndicator)
   justify-content: center;
   width: 36px;
   height: 36px;
-  background-color: var(--bg-secondary);
+  background-color: transparent;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -262,6 +262,9 @@ watch(currentCategory, updateIndicator)
 
 .user-avatar {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2px;
   border-radius: var(--radius-full);
   transition: all var(--transition-fast);
@@ -277,6 +280,7 @@ watch(currentCategory, updateIndicator)
   cursor: pointer;
   transition: color var(--transition-fast);
   white-space: nowrap;
+  line-height: 1;
 }
 
 .logout-text:hover {

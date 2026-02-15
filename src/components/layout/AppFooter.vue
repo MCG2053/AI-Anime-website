@@ -1,66 +1,10 @@
 <script setup lang="ts">
 const currentYear = new Date().getFullYear()
-
-const quickLinks = [
-  { label: '首页', to: '/' },
-  { label: '搜索', to: '/search' },
-  { label: '个人中心', to: '/user' }
-]
-
-const categories = [
-  { label: '番剧', to: '/?category=anime' },
-  { label: '国创', to: '/?category=chinese' },
-  { label: '剧场版', to: '/?category=movie' }
-]
-
-const aboutLinks = [
-  { label: '关于平台', href: '#' },
-  { label: '联系方式', href: '#' },
-  { label: '帮助中心', href: '#' }
-]
 </script>
 
 <template>
   <footer class="app-footer">
     <div class="app-footer__container">
-      <div class="app-footer__content">
-        <div class="footer-brand">
-          <h3 class="footer-brand__title">AnimeVideo</h3>
-          <p class="footer-brand__desc">
-            专注于动漫视频播放的平台，提供高清流畅的观看体验。
-          </p>
-        </div>
-
-        <div class="footer-links">
-          <div class="footer-links__group">
-            <h4 class="footer-links__title">快速导航</h4>
-            <ul class="footer-links__list">
-              <li v-for="link in quickLinks" :key="link.to">
-                <router-link :to="link.to" class="footer-link">{{ link.label }}</router-link>
-              </li>
-            </ul>
-          </div>
-
-          <div class="footer-links__group">
-            <h4 class="footer-links__title">热门分类</h4>
-            <ul class="footer-links__list">
-              <li v-for="cat in categories" :key="cat.to">
-                <router-link :to="cat.to" class="footer-link">{{ cat.label }}</router-link>
-              </li>
-            </ul>
-          </div>
-
-          <div class="footer-links__group">
-            <h4 class="footer-links__title">关于我们</h4>
-            <ul class="footer-links__list">
-              <li v-for="link in aboutLinks" :key="link.label">
-                <a :href="link.href" class="footer-link">{{ link.label }}</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
       <div class="app-footer__bottom">
         <p class="copyright">&copy; {{ currentYear }} AnimeVideo. All rights reserved.</p>
         <div class="social-links">
@@ -87,99 +31,14 @@ const aboutLinks = [
 
 <style scoped>
 .app-footer {
-  background-color: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+  background-color: var(--bg-color);
+  transition: background-color var(--transition-normal);
 }
 
 .app-footer__container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-lg);
-}
-
-.app-footer__content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-2xl);
-}
-
-@media (min-width: 768px) {
-  .app-footer__content {
-    grid-template-columns: 1.5fr 2fr;
-  }
-}
-
-.footer-brand {
-  max-width: 300px;
-}
-
-.footer-brand__title {
-  font-size: var(--font-size-xl);
-  font-weight: 800;
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--spacing-sm);
-}
-
-.footer-brand__desc {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  line-height: var(--line-height-relaxed);
-}
-
-.footer-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-lg);
-}
-
-@media (max-width: 640px) {
-  .footer-links {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.footer-links__title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: var(--spacing-md);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.footer-links__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.footer-link {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  transition: color var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.footer-link:hover {
-  color: var(--color-primary);
-}
-
-.footer-link::before {
-  content: '';
-  width: 0;
-  height: 1px;
-  background-color: var(--color-primary);
-  transition: width var(--transition-fast);
-}
-
-.footer-link:hover::before {
-  width: 12px;
+  padding: var(--spacing-2xl) var(--spacing-lg);
 }
 
 .app-footer__bottom {
@@ -187,16 +46,6 @@ const aboutLinks = [
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--border-color);
-}
-
-@media (min-width: 640px) {
-  .app-footer__bottom {
-    flex-direction: row;
-    justify-content: space-between;
-  }
 }
 
 .copyright {

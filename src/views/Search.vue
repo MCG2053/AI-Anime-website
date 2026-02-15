@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import VideoCard from '@/components/common/VideoCard.vue'
-import { generateMockVideos, mockTags } from '@/services/mock'
+import { generateMockVideos } from '@/services/mock'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,42 +14,6 @@ const searchFocused = ref(false)
 const hotVideos = ref<any[]>([])
 
 const searchKeyword = computed(() => route.query.q as string || '')
-
-const yearOptions = [
-  { label: '全部', value: '' },
-  { label: '2025', value: 2025 },
-  { label: '2024', value: 2024 },
-  { label: '2023', value: 2023 },
-  { label: '2022', value: 2022 },
-  { label: '更早', value: 'earlier' }
-]
-
-const countryOptions = [
-  { label: '全部', value: '' },
-  { label: '日本', value: '日本' },
-  { label: '中国', value: '中国' },
-  { label: '美国', value: '美国' },
-  { label: '韩国', value: '韩国' }
-]
-
-const genreOptions = computed(() => {
-  const genres = mockTags.filter(t => t.type === 'genre')
-  return [
-    { label: '全部', value: '' },
-    ...genres.map(g => ({ label: g.name, value: g.name }))
-  ]
-})
-
-const statusOptions = [
-  { label: '全部', value: '' },
-  { label: '连载中', value: 'ongoing' },
-  { label: '已完结', value: 'completed' }
-]
-
-const selectedYear = ref<string | number>('')
-const selectedCountry = ref('')
-const selectedGenre = ref('')
-const selectedStatus = ref('')
 
 onMounted(() => {
   hotVideos.value = generateMockVideos(12)
@@ -76,12 +40,6 @@ function performSearch() {
 
 function handleSearch() {
   performSearch()
-}
-
-function applyFilters() {
-  if (searchKeyword.value) {
-    performSearch()
-  }
 }
 </script>
 
@@ -110,61 +68,6 @@ function applyFilters() {
     <div class="search-page__content">
       <div class="search-page__grid-container">
         <template v-if="!searchKeyword">
-          <div class="filter-panel">
-            <div class="filter-row">
-              <span class="filter-row__label">年份</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in yearOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedYear === option.value }]"
-                  @click="selectedYear = option.value"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-            <div class="filter-row">
-              <span class="filter-row__label">地区</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in countryOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedCountry === option.value }]"
-                  @click="selectedCountry = option.value"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-            <div class="filter-row">
-              <span class="filter-row__label">类型</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in genreOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedGenre === option.value }]"
-                  @click="selectedGenre = option.value"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-            <div class="filter-row">
-              <span class="filter-row__label">状态</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in statusOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedStatus === option.value }]"
-                  @click="selectedStatus = option.value"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-          </div>
-
           <h2 class="search-page__section-title">热门推荐</h2>
           <div class="search-page__grid">
             <VideoCard
@@ -176,61 +79,6 @@ function applyFilters() {
         </template>
 
         <template v-else>
-          <div class="filter-panel">
-            <div class="filter-row">
-              <span class="filter-row__label">年份</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in yearOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedYear === option.value }]"
-                  @click="selectedYear = option.value; applyFilters()"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-            <div class="filter-row">
-              <span class="filter-row__label">地区</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in countryOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedCountry === option.value }]"
-                  @click="selectedCountry = option.value; applyFilters()"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-            <div class="filter-row">
-              <span class="filter-row__label">类型</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in genreOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedGenre === option.value }]"
-                  @click="selectedGenre = option.value; applyFilters()"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-            <div class="filter-row">
-              <span class="filter-row__label">状态</span>
-              <div class="filter-row__options">
-                <button
-                  v-for="option in statusOptions"
-                  :key="option.value"
-                  :class="['filter-tag', { 'filter-tag--active': selectedStatus === option.value }]"
-                  @click="selectedStatus = option.value; applyFilters()"
-                >
-                  {{ option.label }}
-                </button>
-              </div>
-            </div>
-          </div>
-
           <div v-if="!loading" class="search-page__result-info">
             <span class="search-page__result-keyword">"{{ searchKeyword }}"</span>
             <span class="search-page__result-text">的搜索结果</span>
@@ -269,7 +117,8 @@ function applyFilters() {
 }
 
 .search-page__header {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-3xl) var(--spacing-2xl);
+  padding-top: 100px;
 }
 
 .search-page__search-container {
@@ -313,7 +162,7 @@ function applyFilters() {
 }
 
 .search-page__underline {
-  height: 2px;
+  height: 3px;
   background-color: var(--border-color);
   transition: background var(--transition-fast);
 }
@@ -323,11 +172,11 @@ function applyFilters() {
 }
 
 .search-page__content {
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: var(--spacing-2xl) var(--spacing-2xl);
 }
 
 .search-page__grid-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -338,91 +187,10 @@ function applyFilters() {
   margin-bottom: var(--spacing-lg);
 }
 
-.filter-panel {
-  background-color: var(--bg-color);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-}
-
-.filter-row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) 0;
-  border-bottom: 1px dashed var(--border-color);
-}
-
-.filter-row:last-child {
-  border-bottom: none;
-}
-
-.filter-row__label {
-  flex-shrink: 0;
-  width: 52px;
-  font-size: 1rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  padding-top: 6px;
-}
-
-.filter-row__options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-}
-
-.filter-tag {
-  padding: 4px 12px;
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  color: var(--text-secondary);
-  background-color: transparent;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-  position: relative;
-}
-
-.filter-tag:hover {
-  color: #3b82f6;
-  background-color: var(--bg-hover);
-}
-
-.filter-tag--active {
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.filter-tag--active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 2px;
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  border-radius: var(--radius-full);
-}
-
-.filter-tag--active:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
 .search-page__result-info {
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-strong);
 }
 
 .search-page__result-keyword {
@@ -474,7 +242,7 @@ function applyFilters() {
 .search-page__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-lg);
+  gap: var(--spacing-xl);
 }
 
 @media (min-width: 640px) {

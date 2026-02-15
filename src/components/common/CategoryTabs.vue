@@ -117,7 +117,7 @@ defineExpose({ updateIndicator })
 <style scoped>
 .category-tabs {
   background-color: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-strong);
   position: relative;
 }
 
@@ -188,7 +188,7 @@ defineExpose({ updateIndicator })
 .category-tabs__indicator {
   position: absolute;
   bottom: 0;
-  height: 2px;
+  height: 3px;
   background: var(--color-primary);
   border-radius: var(--radius-full);
   transition: all var(--transition-normal);

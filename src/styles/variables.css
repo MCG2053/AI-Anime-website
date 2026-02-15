@@ -25,10 +25,10 @@
   --color-like: #ec4899;
   --color-collect: #f59e0b;
   
-  --bg-color: #ffffff;
-  --bg-secondary: #f8fafc;
+  --bg-color: #f5f3ed;
+  --bg-secondary: #ebe8e0;
   --bg-card: #ffffff;
-  --bg-hover: #f1f5f9;
+  --bg-hover: #ddd9cf;
   --bg-mask: rgba(0, 0, 0, 0.5);
   
   --text-color: #1e293b;
@@ -36,8 +36,9 @@
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
   
-  --border-color: #e2e8f0;
-  --border-light: #f1f5f9;
+  --border-color: #d1d5db;
+  --border-light: #e5e7eb;
+  --border-strong: #9ca3af;
   --border-focus: var(--color-primary);
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -53,12 +54,13 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
   
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-2xl: 48px;
+  --spacing-xs: 6px;
+  --spacing-sm: 12px;
+  --spacing-md: 20px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+  --spacing-2xl: 64px;
+  --spacing-3xl: 80px;
   
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
@@ -66,13 +68,13 @@
   --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
   
   --font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
-  --font-size-xs: 10px;
-  --font-size-sm: 12px;
-  --font-size-base: 14px;
-  --font-size-lg: 16px;
-  --font-size-xl: 18px;
-  --font-size-2xl: 24px;
-  --font-size-3xl: 32px;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 19px;
+  --font-size-2xl: 26px;
+  --font-size-3xl: 34px;
   
   --line-height-tight: 1.25;
   --line-height-normal: 1.5;
@@ -112,19 +114,20 @@
   --color-info: #60a5fa;
   --color-info-light: #1e3a8a;
   
-  --bg-color: #121212;
-  --bg-secondary: #1e1e1e;
-  --bg-card: #1e1e1e;
-  --bg-hover: #2d2d2d;
+  --bg-color: #1a1d23;
+  --bg-secondary: #242830;
+  --bg-card: #2a2f38;
+  --bg-hover: #363c47;
   --bg-mask: rgba(0, 0, 0, 0.7);
   
   --text-color: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --text-inverse: #121212;
+  --text-inverse: #1a1d23;
   
-  --border-color: #333333;
-  --border-light: #2d2d2d;
+  --border-color: #3d4451;
+  --border-light: #363c47;
+  --border-strong: #4b5563;
   
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);

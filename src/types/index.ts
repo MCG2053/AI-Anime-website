@@ -122,3 +122,18 @@ export interface ApiResponse<T = unknown> {
   message: string
   data: T
 }
+
+export type AnimeStatus = 'watching' | 'completed'
+
+export interface UserAnime {
+  videoId: number
+  status: AnimeStatus
+  addedAt: string
+  video?: Video
+}
+
+export interface UserAnimeListResponse {
+  watching: UserAnime[]
+  completed: UserAnime[]
+  history: UserAnime[]
+}

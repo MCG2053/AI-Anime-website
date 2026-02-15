@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router'
 import { NSpin } from 'naive-ui'
 import { useVideoStore, type WeekSchedule } from '@/stores/video'
 import VideoCard from '@/components/common/VideoCard.vue'
+import VideoListItem from '@/components/common/VideoListItem.vue'
+import ViewToggle from '@/components/common/ViewToggle.vue'
 import WeekScheduleComponent from '@/components/common/WeekSchedule.vue'
 import Skeleton from '@/components/common/Skeleton.vue'
 import { generateMockVideos, generateWeekSchedule, mockTags } from '@/services/mock'
@@ -15,6 +17,7 @@ const loading = ref(false)
 const videos = ref(generateMockVideos(20))
 const weekSchedule = ref<WeekSchedule[]>([])
 const scheduleLoading = ref(false)
+const viewMode = ref<'grid' | 'list'>('grid')
 
 const currentCategory = computed({
   get: () => videoStore.currentCategory,
@@ -178,6 +181,10 @@ onMounted(() => {
         </div>
 
         <div class="home-page__content">
+          <div class="home-page__toolbar">
+            <span class="home-page__count">共 {{ videos.length }} 部</span>
+            <ViewToggle v-model="viewMode" />
+          </div>
           <NSpin :show="loading">
             <template v-if="loading">
               <div class="video-grid">
@@ -185,7 +192,7 @@ onMounted(() => {
               </div>
             </template>
             <template v-else>
-              <TransitionGroup name="list" tag="div" class="video-grid">
+              <TransitionGroup v-if="viewMode === 'grid'" name="list" tag="div" class="video-grid">
                 <div
                   v-for="(video, index) in videos"
                   :key="video.id"
@@ -195,6 +202,13 @@ onMounted(() => {
                   <VideoCard :video="video" />
                 </div>
               </TransitionGroup>
+              <div v-else class="video-list">
+                <VideoListItem
+                  v-for="video in videos"
+                  :key="video.id"
+                  :video="video"
+                />
+              </div>
             </template>
           </NSpin>
 
@@ -216,24 +230,24 @@ onMounted(() => {
 }
 
 .home-page__container {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl) var(--spacing-2xl);
 }
 
 .filter-panel {
   background-color: var(--bg-color);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
 }
 
 .filter-row {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) 0;
-  border-bottom: 1px dashed var(--border-color);
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md) 0;
+  border-bottom: 2px solid var(--border-strong);
 }
 
 .filter-row:last-child {
@@ -290,7 +304,7 @@ onMounted(() => {
   left: 50%;
   transform: translateX(-50%);
   width: 60%;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   border-radius: var(--radius-full);
 }
@@ -305,7 +319,25 @@ onMounted(() => {
 .video-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.video-list {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-lg);
+}
+
+.home-page__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.home-page__count {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
 }
 
 @media (min-width: 640px) {

@@ -109,17 +109,24 @@ const formatDuration = (seconds: number): string => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
   cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
   background-color: var(--bg-card);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
   transform-style: preserve-3d;
   will-change: transform;
 }
 
+.dark .video-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
 .video-card__cover {
   position: relative;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background-color: var(--bg-secondary);
 }
@@ -214,7 +221,7 @@ const formatDuration = (seconds: number): string => {
 .video-card__title {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
   line-height: 1.4;
   height: 2.8em;
   display: -webkit-box;
@@ -236,7 +243,7 @@ const formatDuration = (seconds: number): string => {
   align-items: center;
   justify-content: space-between;
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   min-height: 20px;
   transition: color var(--transition-fast);
 }
@@ -263,7 +270,9 @@ const formatDuration = (seconds: number): string => {
   font-size: 0.8125rem;
   font-weight: 700;
   padding: 2px 8px;
-  color: white;
+  background: transparent;
+  color: var(--text-secondary);
+  -webkit-text-fill-color: var(--text-secondary);
   transition: all var(--transition-fast);
 }
 
