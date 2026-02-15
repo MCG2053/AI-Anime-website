@@ -195,6 +195,18 @@ onMounted(() => {
   padding: var(--spacing-lg);
 }
 
+@media (max-width: 768px) {
+  .bangumi-detail__container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .bangumi-detail__container {
+    padding: var(--spacing-sm);
+  }
+}
+
 .bangumi-detail__header {
   display: flex;
   gap: var(--spacing-2xl);
@@ -204,12 +216,46 @@ onMounted(() => {
   padding: var(--spacing-xl);
 }
 
+@media (max-width: 1024px) {
+  .bangumi-detail__header {
+    gap: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .bangumi-detail__header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-lg);
+    gap: var(--spacing-lg);
+  }
+}
+
 .bangumi-detail__cover {
   flex-shrink: 0;
   width: 320px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 1024px) {
+  .bangumi-detail__cover {
+    width: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bangumi-detail__cover {
+    width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bangumi-detail__cover {
+    width: 140px;
+  }
 }
 
 .bangumi-detail__cover img {
@@ -231,6 +277,18 @@ onMounted(() => {
   color: var(--text-color);
   line-height: 1.3;
   margin: 0;
+}
+
+@media (max-width: 768px) {
+  .bangumi-detail__title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .bangumi-detail__title {
+    font-size: var(--font-size-lg);
+  }
 }
 
 .bangumi-detail__meta {
@@ -306,6 +364,20 @@ onMounted(() => {
   margin-top: auto;
 }
 
+@media (max-width: 768px) {
+  .bangumi-detail__actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .bangumi-detail__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
 .bangumi-detail__action-btn {
   display: flex;
   align-items: center;
@@ -366,6 +438,18 @@ onMounted(() => {
   background-color: var(--bg-secondary);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .bangumi-detail__section {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .bangumi-detail__section {
+    padding: var(--spacing-sm);
+  }
 }
 
 .bangumi-detail__section-title {

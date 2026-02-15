@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NAvatar } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
@@ -13,6 +13,8 @@ const videoStore = useVideoStore()
 
 const tabRefs = ref<Record<string, HTMLElement>>({})
 const indicatorStyle = ref({ left: '0px', width: '0px' })
+const mobileMenuOpen = ref(false)
+const isMobile = ref(false)
 
 const currentCategory = computed({
   get: () => videoStore.currentCategory,
@@ -21,6 +23,19 @@ const currentCategory = computed({
 
 const isHome = computed(() => route.name === 'Home')
 const isSearchPage = computed(() => route.name === 'Search')
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 
 const updateIndicator = () => {
   nextTick(() => {
@@ -45,22 +60,33 @@ function handleCategoryClick(slug: string) {
   if (route.name !== 'Home') {
     router.push({ name: 'Home' })
   }
+  mobileMenuOpen.value = false
 }
 
 function goToSearch() {
   router.push({ name: 'Search' })
+  mobileMenuOpen.value = false
 }
 
 function handleLogout() {
   userStore.logout()
   router.push({ name: 'Home' })
+  mobileMenuOpen.value = false
 }
 
 function goToUserCenter() {
   router.push('/user')
+  mobileMenuOpen.value = false
+}
+
+function toggleMobileMenu() {
+  mobileMenuOpen.value = !mobileMenuOpen.value
 }
 
 watch(currentCategory, updateIndicator)
+watch(() => route.path, () => {
+  mobileMenuOpen.value = false
+})
 </script>
 
 <template>
@@ -117,9 +143,32 @@ watch(currentCategory, updateIndicator)
               登录
             </button>
           </template>
+
+          <button class="hamburger-btn" @click="toggleMobileMenu">
+            <span :class="['hamburger-line', { 'hamburger-line--active': mobileMenuOpen }]"></span>
+            <span :class="['hamburger-line', { 'hamburger-line--active': mobileMenuOpen }]"></span>
+            <span :class="['hamburger-line', { 'hamburger-line--active': mobileMenuOpen }]"></span>
+          </button>
         </div>
       </div>
     </div>
+
+    <Transition name="mobile-menu">
+      <div v-if="mobileMenuOpen && isMobile" class="mobile-menu">
+        <div class="mobile-menu__content">
+          <div class="mobile-menu__nav">
+            <button
+              v-for="category in videoStore.categories"
+              :key="category.slug"
+              :class="['mobile-menu__item', { 'mobile-menu__item--active': currentCategory === category.slug }]"
+              @click="handleCategoryClick(category.slug)"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </header>
 </template>
 
@@ -304,14 +353,137 @@ watch(currentCategory, updateIndicator)
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-@media (max-width: 768px) {
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  gap: 5px;
+}
+
+.hamburger-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.hamburger-line {
+  width: 20px;
+  height: 2px;
+  background-color: var(--text-color);
+  border-radius: 2px;
+  transition: all var(--transition-fast);
+}
+
+.hamburger-line--active:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-line--active:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line--active:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+}
+
+.mobile-menu__content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.mobile-menu__nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.mobile-menu__item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.mobile-menu__item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-color);
+}
+
+.mobile-menu__item--active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%);
+  color: #3b82f6;
+}
+
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+  transition: all var(--transition-normal);
+}
+
+.mobile-menu-enter-from,
+.mobile-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@media (max-width: 1024px) {
   .app-header__center {
     display: none;
   }
 
-  .nav-tabs__item {
+  .hamburger-btn {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header__container {
+    padding: 0 var(--spacing-md);
+    height: 60px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .logout-text {
+    display: none;
+  }
+
+  .mobile-menu__nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .login-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-xs);
+  }
+
+  .mobile-menu__nav {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -41,6 +41,18 @@ const currentYear = new Date().getFullYear()
   padding: var(--spacing-2xl) var(--spacing-lg);
 }
 
+@media (max-width: 768px) {
+  .app-footer__container {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .app-footer__container {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+}
+
 .app-footer__bottom {
   display: flex;
   flex-direction: column;

@@ -197,12 +197,26 @@ function goHome() {
   padding: var(--spacing-lg);
 }
 
+@media (max-width: 480px) {
+  .login-page__content {
+    padding: var(--spacing-md);
+    max-width: 100%;
+  }
+}
+
 .login-card {
   background-color: var(--bg-card);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   padding: var(--spacing-2xl);
   animation: fadeInUp 0.5s ease;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+  }
 }
 
 @keyframes fadeInUp {

@@ -282,4 +282,45 @@ const formatDuration = (seconds: number): string => {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+@media (max-width: 768px) {
+  .video-card__content {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+
+  .video-card__title {
+    font-size: var(--font-size-sm);
+    height: 2.6em;
+  }
+
+  .video-card__meta {
+    font-size: var(--font-size-xs);
+  }
+
+  .video-card__play {
+    width: 44px;
+    height: 44px;
+  }
+
+  .video-card__play svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-card__content {
+    padding: var(--spacing-xs);
+  }
+
+  .video-card__title {
+    font-size: var(--font-size-xs);
+  }
+
+  .video-card__tags .tag {
+    font-size: 0.75rem;
+    padding: 1px 6px;
+  }
+}
 </style>

@@ -140,6 +140,29 @@ const currentVideos = computed(() => {
   padding-bottom: var(--spacing-3xl);
 }
 
+@media (max-width: 1024px) {
+  .user-space__main {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    padding-bottom: var(--spacing-2xl);
+  }
+}
+
+@media (max-width: 768px) {
+  .user-space__main {
+    padding: var(--spacing-md);
+    padding-bottom: var(--spacing-xl);
+    margin: 0 var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .user-space__main {
+    padding: var(--spacing-sm);
+    margin: 0 var(--spacing-sm);
+  }
+}
+
 .user-space__header {
   display: flex;
   align-items: center;
