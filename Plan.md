@@ -390,6 +390,9 @@ src/
 - **v1.0.1** - 界面优化更新，修复 video-card 和搜索页样式问题
 - **v1.0.2** - UI优化更新，边框样式统一、页头页脚调整
 - **v1.0.3** - 响应式布局适配，支持手机端和平板端
+- **v1.0.4** - 视频播放页面布局修复
+- **v1.0.5** - UI细节优化与动画效果，列表切换过渡动画统一
+- **v1.0.6** - 用户认证页面扩展，新增忘记密码和注册页面
 
 ---
 
@@ -503,4 +506,145 @@ src/
 
 ---
 
-*最后更新: 2026-02-15*
+### v1.0.5 - UI细节优化与动画效果 (2026-02-16)
+
+#### 任务列表
+
+**1. filter-row-label 手机端对齐调整**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/views/Home.vue`
+- **需求**: 将 filter-row-label 在手机端布局模式下的位置向右移动，使其与 filter-tag 保持垂直对齐
+- **解决方案**: 在 768px 断点下添加 `padding-left: 12px`，与 filter-tag 的左边距保持一致
+
+**2. mobile-menu-content 组件排列调整**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/components/layout/AppHeader.vue`
+- **需求**: 调整 mobile-menu-content 中的组件排列方式，三个一排共两排
+- **解决方案**: 移除 768px 和 480px 断点的 grid-template-columns 覆盖，保持默认的 `repeat(3, 1fr)` 三列布局
+
+**3. user-space-nav-item 手机端布局调整**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/views/User/index.vue`
+- **需求**: 调整手机端页面下 user-space-nav-item 三个按键的排列方式为同行一字排开
+- **解决方案**: 
+  - 设置 `flex-wrap: nowrap` 禁止换行
+  - 设置 `flex: 1` 使每个按钮等宽
+  - 设置 `justify-content: center` 居中内容
+
+**4. video-card-tags 样式统一**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/components/common/VideoCard.vue`
+- **需求**: 让 video-card-tags 的文字背景与 video-list-item-tags 保持一致
+- **解决方案**: 更新 `.video-card__tags .tag` 样式，使用与 VideoListItem 一致的渐变背景和文字颜色
+
+**5. 列表切换过渡动画**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/views/Home.vue`, `src/views/Search.vue`, `src/views/BangumiDetail.vue`, `src/views/User/index.vue`
+- **需求**: 切换卡片/列表模式时一致的过渡动画应用到所有页面
+- **解决方案**: 
+  - 使用 Vue TransitionGroup 组件包裹列表
+  - 添加 `list-enter-active`, `list-leave-active`, `list-move` 过渡类
+  - 添加 `fadeInUp` 关键帧动画实现入场效果
+  - 通过 `animationDelay` 实现错落动画
+
+**6. video-card-tags 文字颜色修复**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/components/common/VideoCard.vue`
+- **问题**: video-card-tags 中的文字颜色根本看不到
+- **原因分析**: 模板中使用了 `class="tag tag-primary"`，而 `tag-primary` 类在 global.css 中使用了 `-webkit-text-fill-color: transparent` 导致文字透明
+- **解决方案**: 移除模板中的 `tag-primary` 类，只保留 `class="tag"`
+
+#### 涉及文件汇总
+
+| 文件路径 | 修改类型 |
+|---------|---------|
+| `src/views/Home.vue` | 样式修改、模板修改 |
+| `src/views/Search.vue` | 模板修改、样式新增 |
+| `src/views/BangumiDetail.vue` | 模板修改、样式新增 |
+| `src/views/User/index.vue` | 样式修改、模板修改 |
+| `src/components/layout/AppHeader.vue` | 样式删除 |
+| `src/components/common/VideoCard.vue` | 模板修改、样式修改 |
+
+#### 技术要点
+
+1. **Vue TransitionGroup**: 实现列表项的进入/离开/移动过渡动画
+2. **CSS Keyframes**: 使用 `@keyframes fadeInUp` 创建自定义入场动画
+3. **animationDelay**: 通过动态设置延迟时间实现错落效果
+4. **CSS 类优先级**: `-webkit-text-fill-color: transparent` 会覆盖 color 属性
+
+#### 测试验证
+
+- ✅ 开发服务器运行正常（http://localhost:3000/）
+- ✅ HMR热更新正常
+- ✅ 无编译错误
+- ✅ 手机端布局验证通过
+
+---
+
+### v1.0.6 - 用户认证页面扩展 (2026-02-16)
+
+#### 任务列表
+
+**1. 创建忘记密码页面**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/views/ForgotPassword.vue` (新建)
+- **功能特性**:
+  - 与登录页面布局一致的卡片式设计
+  - 邮箱输入验证
+  - 发送重置链接功能（Mock）
+  - 发送成功后显示成功提示界面
+  - 返回登录链接
+
+**2. 创建注册页面**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/views/Register.vue` (新建)
+- **功能特性**:
+  - 与登录页面布局一致的卡片式设计
+  - 用户名、邮箱、密码、确认密码四个输入字段
+  - 完整的表单验证（用户名长度、邮箱格式、密码长度、密码一致性）
+  - 用户协议复选框
+  - 密码显示/隐藏切换
+  - 注册成功后自动登录并跳转首页
+
+**3. 更新路由配置**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/router/index.ts`
+- **新增路由**:
+  - `/register` - 注册页面
+  - `/forgot-password` - 忘记密码页面
+  - 两个路由都设置了 `guest: true` 元数据，已登录用户访问会重定向到首页
+
+**4. 更新登录页面链接**
+- **状态**: ✅ 已完成
+- **修改文件**: `src/views/Login.vue`
+- **修改内容**:
+  - "忘记密码?" 链接跳转到 `/forgot-password`
+  - "注册账户" 链接跳转到 `/register`
+
+#### 涉及文件汇总
+
+| 文件路径 | 修改类型 |
+|---------|---------|
+| `src/views/ForgotPassword.vue` | 新建 |
+| `src/views/Register.vue` | 新建 |
+| `src/router/index.ts` | 新增路由 |
+| `src/views/Login.vue` | 功能修改 |
+
+#### 技术要点
+
+1. **布局一致性**: 新页面完全复用登录页面的样式结构，保持视觉统一
+2. **表单验证**: 实时验证与提交验证相结合，提供友好的错误提示
+3. **Vue Transition**: 使用 `<Transition>` 组件实现错误消息的平滑过渡
+4. **响应式设计**: 继承登录页面的移动端适配样式
+
+#### 测试验证
+
+- ✅ 开发服务器运行正常（http://localhost:3000/）
+- ✅ HMR热更新正常
+- ✅ 无编译错误
+- ✅ 路由跳转正常
+- ✅ 表单验证功能正常
+
+---
+
+*最后更新: 2026-02-16*

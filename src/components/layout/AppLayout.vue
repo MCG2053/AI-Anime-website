@@ -6,8 +6,9 @@ import AppFooter from './AppFooter.vue'
 
 const route = useRoute()
 
-const showHeader = computed(() => route.name !== 'Login')
-const showFooter = computed(() => route.name !== 'Login')
+const authPages = ['Login', 'Register', 'ForgotPassword', 'Terms', 'Privacy']
+const showHeader = computed(() => !authPages.includes(route.name as string))
+const showFooter = computed(() => !authPages.includes(route.name as string))
 </script>
 
 <template>

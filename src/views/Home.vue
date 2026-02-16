@@ -202,13 +202,16 @@ onMounted(() => {
                   <VideoCard :video="video" />
                 </div>
               </TransitionGroup>
-              <div v-else class="video-list">
-                <VideoListItem
-                  v-for="video in videos"
+              <TransitionGroup v-else name="list" tag="div" class="video-list">
+                <div
+                  v-for="(video, index) in videos"
                   :key="video.id"
-                  :video="video"
-                />
-              </div>
+                  class="video-list__item"
+                  :style="{ animationDelay: `${index * 50}ms` }"
+                >
+                  <VideoListItem :video="video" />
+                </div>
+              </TransitionGroup>
             </template>
           </NSpin>
 
@@ -309,8 +312,10 @@ onMounted(() => {
 @media (max-width: 768px) {
   .filter-row__label {
     width: auto;
-    padding-top: 0;
-    font-size: var(--font-size-sm);
+    padding-top: 4px;
+    padding-left: 12px;
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-xs);
   }
 }
 
@@ -380,6 +385,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+}
+
+.video-list__item {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
 }
 
 .home-page__toolbar {

@@ -69,13 +69,16 @@ function handleSearch() {
       <div class="search-page__grid-container">
         <template v-if="!searchKeyword">
           <h2 class="search-page__section-title">热门推荐</h2>
-          <div class="search-page__grid">
-            <VideoCard
-              v-for="video in hotVideos"
+          <TransitionGroup name="list" tag="div" class="search-page__grid">
+            <div
+              v-for="(video, index) in hotVideos"
               :key="video.id"
-              :video="video"
-            />
-          </div>
+              class="search-page__grid-item"
+              :style="{ animationDelay: `${index * 50}ms` }"
+            >
+              <VideoCard :video="video" />
+            </div>
+          </TransitionGroup>
         </template>
 
         <template v-else>
@@ -90,13 +93,16 @@ function handleSearch() {
             <span>搜索中...</span>
           </div>
 
-          <div v-else-if="results.length > 0" class="search-page__grid">
-            <VideoCard
-              v-for="video in results"
+          <TransitionGroup v-else-if="results.length > 0" name="list" tag="div" class="search-page__grid">
+            <div
+              v-for="(video, index) in results"
               :key="video.id"
-              :video="video"
-            />
-          </div>
+              class="search-page__grid-item"
+              :style="{ animationDelay: `${index * 50}ms` }"
+            >
+              <VideoCard :video="video" />
+            </div>
+          </TransitionGroup>
           <div v-else class="search-page__empty">
             <svg viewBox="0 0 24 24" fill="currentColor" class="search-page__empty-icon">
               <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -269,6 +275,41 @@ function handleSearch() {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-xl);
+}
+
+.search-page__grid-item {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.list-move {
+  transition: transform 0.3s ease;
 }
 
 @media (min-width: 640px) {

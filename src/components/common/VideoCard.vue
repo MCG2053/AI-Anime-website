@@ -41,7 +41,7 @@
         <span class="video-card__year">{{ video.year }}</span>
       </div>
       <div v-if="video.tags && video.tags.length" class="video-card__tags">
-        <span v-for="tag in video.tags.slice(0, 2)" :key="tag" class="tag tag-primary">
+        <span v-for="tag in video.tags.slice(0, 2)" :key="tag" class="tag">
           {{ tag }}
         </span>
       </div>
@@ -267,20 +267,18 @@ const formatDuration = (seconds: number): string => {
 }
 
 .video-card__tags .tag {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  background: transparent;
+  padding: 2px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
   color: var(--text-secondary);
-  -webkit-text-fill-color: var(--text-secondary);
+  border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
 }
 
 .video-card:hover .video-card__tags .tag {
-  background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+  color: var(--color-primary);
 }
 
 @media (max-width: 768px) {
@@ -319,7 +317,7 @@ const formatDuration = (seconds: number): string => {
   }
 
   .video-card__tags .tag {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     padding: 1px 6px;
   }
 }

@@ -15,6 +15,30 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '登录', guest: true }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/Register.vue'),
+    meta: { title: '注册', guest: true }
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('@/views/ForgotPassword.vue'),
+    meta: { title: '忘记密码', guest: true }
+  },
+  {
+    path: '/terms',
+    name: 'Terms',
+    component: () => import('@/views/Terms.vue'),
+    meta: { title: '用户协议' }
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy',
+    component: () => import('@/views/Privacy.vue'),
+    meta: { title: '隐私政策' }
+  },
+  {
     path: '/bangumi/:id',
     name: 'BangumiDetail',
     component: () => import('@/views/BangumiDetail.vue'),

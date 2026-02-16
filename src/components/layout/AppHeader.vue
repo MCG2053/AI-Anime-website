@@ -470,20 +470,12 @@ watch(() => route.path, () => {
   .logout-text {
     display: none;
   }
-
-  .mobile-menu__nav {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (max-width: 480px) {
   .login-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-xs);
-  }
-
-  .mobile-menu__nav {
-    grid-template-columns: 1fr;
   }
 }
 </style>

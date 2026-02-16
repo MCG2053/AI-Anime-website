@@ -124,30 +124,32 @@ onMounted(() => {
             </div>
 
             <div class="bangumi-detail__actions">
-              <button class="bangumi-detail__action-btn bangumi-detail__action-btn--primary" @click="handlePlay">
+              <button class="bangumi-detail__action-btn bangumi-detail__action-btn--primary bangumi-detail__action-btn--play" @click="handlePlay">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8 5v14l11-7z"/>
                 </svg>
                 立即播放
               </button>
-              <button 
-                :class="['bangumi-detail__action-btn', { 'bangumi-detail__action-btn--active': isWatching }]" 
-                @click="handleWatching"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-                {{ isWatching ? '正在追' : '正在追' }}
-              </button>
-              <button 
-                :class="['bangumi-detail__action-btn', { 'bangumi-detail__action-btn--active': isCompleted }]" 
-                @click="handleCompleted"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                </svg>
-                {{ isCompleted ? '已追完' : '已追完' }}
-              </button>
+              <div class="bangumi-detail__actions-row">
+                <button 
+                  :class="['bangumi-detail__action-btn', { 'bangumi-detail__action-btn--active': isWatching }]" 
+                  @click="handleWatching"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  {{ isWatching ? '正在追' : '正在追' }}
+                </button>
+                <button 
+                  :class="['bangumi-detail__action-btn', { 'bangumi-detail__action-btn--active': isCompleted }]" 
+                  @click="handleCompleted"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  {{ isCompleted ? '已追完' : '已追完' }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -169,13 +171,16 @@ onMounted(() => {
 
           <div class="bangumi-detail__section">
             <h2 class="bangumi-detail__section-title">相关推荐</h2>
-            <div class="bangumi-detail__related">
-              <VideoCard
-                v-for="v in relatedVideos"
+            <TransitionGroup name="list" tag="div" class="bangumi-detail__related">
+              <div
+                v-for="(v, index) in relatedVideos"
                 :key="v.id"
-                :video="v"
-              />
-            </div>
+                class="bangumi-detail__related-item"
+                :style="{ animationDelay: `${index * 50}ms` }"
+              >
+                <VideoCard :video="v" />
+              </div>
+            </TransitionGroup>
           </div>
         </div>
       </div>
@@ -364,17 +369,54 @@ onMounted(() => {
   margin-top: auto;
 }
 
+.bangumi-detail__actions-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
 @media (max-width: 768px) {
   .bangumi-detail__actions {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+  }
+
+  .bangumi-detail__action-btn--play {
+    flex: none;
+    max-width: 140px;
+  }
+
+  .bangumi-detail__actions-row {
+    width: auto;
     justify-content: center;
-    flex-wrap: wrap;
+    gap: var(--spacing-md);
   }
 }
 
 @media (max-width: 480px) {
   .bangumi-detail__actions {
-    flex-direction: column;
-    width: 100%;
+    gap: var(--spacing-md);
+  }
+
+  .bangumi-detail__action-btn--play {
+    flex: none;
+    max-width: 140px;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: var(--font-size-sm);
+  }
+
+  .bangumi-detail__actions-row {
+    gap: var(--spacing-md);
+  }
+
+  .bangumi-detail__actions-row .bangumi-detail__action-btn {
+    flex: none;
+    max-width: 110px;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -487,6 +529,41 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: var(--spacing-md);
+}
+
+.bangumi-detail__related-item {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.list-move {
+  transition: transform 0.3s ease;
 }
 
 @media (max-width: 1200px) {

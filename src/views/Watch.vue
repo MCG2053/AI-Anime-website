@@ -353,9 +353,22 @@ onMounted(loadVideo)
 }
 
 .watch-page__episode-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+  .watch-page__episode-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .watch-page__episode-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xs);
+  }
 }
 
 .watch-page__episode-btn {

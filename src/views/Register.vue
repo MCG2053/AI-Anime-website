@@ -1,33 +1,50 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { mockLoginResponse } from '@/services/mock'
 
 const router = useRouter()
-const route = useRoute()
 const userStore = useUserStore()
-
-function goForgotPassword() {
-  router.push('/forgot-password')
-}
-
-function goRegister() {
-  router.push('/register')
-}
 
 const loading = ref(false)
 const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const agreedToTerms = ref(false)
 const formValue = ref({
+  username: '',
   email: '',
-  password: ''
+  password: '',
+  confirmPassword: ''
 })
 
+const usernameFocused = ref(false)
 const emailFocused = ref(false)
 const passwordFocused = ref(false)
+const confirmPasswordFocused = ref(false)
 
+const usernameError = ref('')
 const emailError = ref('')
 const passwordError = ref('')
+const confirmPasswordError = ref('')
+const termsError = ref('')
+
+function validateUsername() {
+  if (!formValue.value.username) {
+    usernameError.value = '请输入用户名'
+    return false
+  }
+  if (formValue.value.username.length < 2) {
+    usernameError.value = '用户名至少2个字符'
+    return false
+  }
+  if (formValue.value.username.length > 20) {
+    usernameError.value = '用户名最多20个字符'
+    return false
+  }
+  usernameError.value = ''
+  return true
+}
 
 function validateEmail() {
   if (!formValue.value.email) {
@@ -52,34 +69,77 @@ function validatePassword() {
     passwordError.value = '密码至少6个字符'
     return false
   }
+  if (formValue.value.password.length > 50) {
+    passwordError.value = '密码最多50个字符'
+    return false
+  }
   passwordError.value = ''
+  if (formValue.value.confirmPassword) {
+    validateConfirmPassword()
+  }
+  return true
+}
+
+function validateConfirmPassword() {
+  if (!formValue.value.confirmPassword) {
+    confirmPasswordError.value = '请确认密码'
+    return false
+  }
+  if (formValue.value.password !== formValue.value.confirmPassword) {
+    confirmPasswordError.value = '两次输入的密码不一致'
+    return false
+  }
+  confirmPasswordError.value = ''
+  return true
+}
+
+function validateTerms() {
+  if (!agreedToTerms.value) {
+    termsError.value = '请阅读并同意用户协议'
+    return false
+  }
+  termsError.value = ''
   return true
 }
 
 async function handleSubmit() {
+  const usernameValid = validateUsername()
   const emailValid = validateEmail()
   const passwordValid = validatePassword()
+  const confirmPasswordValid = validateConfirmPassword()
+  const termsValid = validateTerms()
   
-  if (!emailValid || !passwordValid) return
+  if (!usernameValid || !emailValid || !passwordValid || !confirmPasswordValid || !termsValid) return
   
   try {
     loading.value = true
 
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1500))
 
-    userStore.login(mockLoginResponse.token, mockLoginResponse.user)
+    userStore.login(mockLoginResponse.token, {
+      ...mockLoginResponse.user,
+      username: formValue.value.username,
+      email: formValue.value.email
+    })
     
-    const redirect = route.query.redirect as string
-    router.push(redirect || '/')
+    router.push('/')
   } catch {
-    passwordError.value = '登录失败，请检查输入'
+    passwordError.value = '注册失败，请稍后重试'
   } finally {
     loading.value = false
   }
 }
 
-function goHome() {
-  router.push('/')
+function goLogin() {
+  router.push('/login')
+}
+
+function goTerms() {
+  router.push('/terms')
+}
+
+function goPrivacy() {
+  router.push('/privacy')
 }
 </script>
 
@@ -87,12 +147,31 @@ function goHome() {
   <div class="login-page">
     <div class="login-page__content">
       <div class="login-card">
-        <div class="login-card__header">
-          <h1 class="login-card__title" @click="goHome">AnimeVideo</h1>
-          <p class="login-card__subtitle">登录您的账户</p>
-        </div>
-
         <form class="login-card__form" @submit.prevent="handleSubmit">
+          <div class="input-field">
+            <div class="input-field__wrapper" :class="{ 'input-field__wrapper--focused': usernameFocused, 'input-field__wrapper--error': usernameError }">
+              <span class="input-field__icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </span>
+              <div class="input-field__area">
+                <input
+                  v-model="formValue.username"
+                  type="text"
+                  class="input-field__input"
+                  placeholder="请输入用户名"
+                  @focus="usernameFocused = true"
+                  @blur="usernameFocused = false; validateUsername()"
+                />
+                <div class="input-field__underline"></div>
+              </div>
+            </div>
+            <Transition name="error">
+              <p v-if="usernameError" class="input-field__error">{{ usernameError }}</p>
+            </Transition>
+          </div>
+
           <div class="input-field">
             <div class="input-field__wrapper" :class="{ 'input-field__wrapper--focused': emailFocused, 'input-field__wrapper--error': emailError }">
               <span class="input-field__icon">
@@ -132,7 +211,6 @@ function goHome() {
                   placeholder="请输入密码"
                   @focus="passwordFocused = true"
                   @blur="passwordFocused = false; validatePassword()"
-                  @keyup.enter="handleSubmit"
                 />
                 <div class="input-field__underline"></div>
               </div>
@@ -150,6 +228,55 @@ function goHome() {
             </Transition>
           </div>
 
+          <div class="input-field">
+            <div class="input-field__wrapper" :class="{ 'input-field__wrapper--focused': confirmPasswordFocused, 'input-field__wrapper--error': confirmPasswordError }">
+              <span class="input-field__icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+              </span>
+              <div class="input-field__area">
+                <input
+                  v-model="formValue.confirmPassword"
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  class="input-field__input"
+                  placeholder="请确认密码"
+                  @focus="confirmPasswordFocused = true"
+                  @blur="confirmPasswordFocused = false; validateConfirmPassword()"
+                  @keyup.enter="handleSubmit"
+                />
+                <div class="input-field__underline"></div>
+              </div>
+              <button type="button" class="input-field__toggle" @click="showConfirmPassword = !showConfirmPassword">
+                <svg v-if="showConfirmPassword" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </button>
+            </div>
+            <Transition name="error">
+              <p v-if="confirmPasswordError" class="input-field__error">{{ confirmPasswordError }}</p>
+            </Transition>
+          </div>
+
+          <div class="terms-checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="agreedToTerms" />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">
+                我已阅读并同意
+                <a class="terms-link" @click.prevent="goTerms">用户协议</a>
+                和
+                <a class="terms-link" @click.prevent="goPrivacy">隐私政策</a>
+              </span>
+            </label>
+          </div>
+          <Transition name="error">
+            <p v-if="termsError" class="terms-error">{{ termsError }}</p>
+          </Transition>
+
           <div class="login-card__actions">
             <button
               type="submit"
@@ -158,14 +285,13 @@ function goHome() {
               :disabled="loading"
             >
               <span v-if="loading" class="login-btn__spinner"></span>
-              <span v-else class="login-btn__text">登 录</span>
+              <span v-else class="login-btn__text">注 册</span>
             </button>
           </div>
 
           <div class="login-card__links">
-            <a href="#" class="login-card__link" @click.prevent="goForgotPassword">忘记密码?</a>
-            <span class="login-card__divider">|</span>
-            <a href="#" class="login-card__link" @click.prevent="goRegister">注册账户</a>
+            <span class="login-card__text">已有账户?</span>
+            <a href="#" class="login-card__link" @click.prevent="goLogin">立即登录</a>
           </div>
         </form>
 
@@ -174,7 +300,7 @@ function goHome() {
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
             </svg>
-            <span>测试账户: user@example.com / 任意密码</span>
+            <span>注册即表示您同意我们的服务条款</span>
           </div>
         </div>
       </div>
@@ -237,36 +363,10 @@ function goHome() {
   }
 }
 
-.login-card__header {
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
-}
-
-.login-card__title {
-  font-size: var(--font-size-3xl);
-  font-weight: 800;
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--spacing-xs);
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
-}
-
-.login-card__title:hover {
-  opacity: 0.9;
-}
-
-.login-card__subtitle {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-}
-
 .login-card__form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .input-field {
@@ -388,6 +488,76 @@ function goHome() {
   transform: translateY(-4px);
 }
 
+.terms-checkbox {
+  margin-top: var(--spacing-xs);
+  display: flex;
+  justify-content: center;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.checkbox-label input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  position: relative;
+  transition: all var(--transition-fast);
+  margin-top: 2px;
+}
+
+.checkbox-label input:checked + .checkbox-custom {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox-label input:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-text {
+  flex: 1;
+}
+
+.terms-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.terms-link:hover {
+  color: var(--color-primary-hover);
+}
+
+.terms-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin-top: var(--spacing-xs);
+  text-align: center;
+}
+
 .login-card__actions {
   margin-top: var(--spacing-sm);
 }
@@ -406,6 +576,7 @@ function goHome() {
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
 }
 
 .login-btn:hover:not(:disabled) {
@@ -445,8 +616,13 @@ function goHome() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   margin-top: var(--spacing-md);
+}
+
+.login-card__text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 .login-card__link {
@@ -458,11 +634,6 @@ function goHome() {
 
 .login-card__link:hover {
   color: var(--color-primary-hover);
-}
-
-.login-card__divider {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
 }
 
 .login-card__footer {

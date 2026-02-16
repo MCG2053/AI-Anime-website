@@ -104,20 +104,26 @@ const currentVideos = computed(() => {
           </div>
 
           <div v-if="currentVideos.length > 0">
-          <div v-if="viewMode === 'grid'" class="user-space__video-grid">
-            <VideoCard
-              v-for="video in currentVideos"
+          <TransitionGroup v-if="viewMode === 'grid'" name="list" tag="div" class="user-space__video-grid">
+            <div
+              v-for="(video, index) in currentVideos"
               :key="video.id"
-              :video="video"
-            />
-          </div>
-          <div v-else class="user-space__video-list">
-            <VideoListItem
-              v-for="video in currentVideos"
+              class="user-space__video-item"
+              :style="{ animationDelay: `${index * 50}ms` }"
+            >
+              <VideoCard :video="video" />
+            </div>
+          </TransitionGroup>
+          <TransitionGroup v-else name="list" tag="div" class="user-space__video-list">
+            <div
+              v-for="(video, index) in currentVideos"
               :key="video.id"
-              :video="video"
-            />
-          </div>
+              class="user-space__video-item"
+              :style="{ animationDelay: `${index * 50}ms` }"
+            >
+              <VideoListItem :video="video" />
+            </div>
+          </TransitionGroup>
         </div>
         <NEmpty v-else :description="activeTab === 'watching' ? '暂无追番' : activeTab === 'completed' ? '暂无已追完的番剧' : '暂无观看记录'" class="user-space__empty" />
         </div>
@@ -302,10 +308,45 @@ const currentVideos = computed(() => {
   gap: var(--spacing-xl);
 }
 
+.user-space__video-item {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .user-space__video-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.list-move {
+  transition: transform 0.3s ease;
 }
 
 .user-space__toolbar {
@@ -375,8 +416,15 @@ const currentVideos = computed(() => {
   }
 
   .user-space__nav {
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .user-space__nav-item {
+    flex: 1;
     justify-content: center;
-    flex-wrap: wrap;
+    padding: 8px 12px;
+    font-size: var(--font-size-sm);
   }
 }
 </style>
