@@ -32,6 +32,8 @@ const playbackRate = ref(1)
 const isFullscreen = ref(false)
 const isPiP = ref(false)
 const decodeMode = ref<'hardware' | 'software'>('hardware')
+const showControls = ref(true)
+let hideControlsTimer: ReturnType<typeof setTimeout> | null = null
 
 const playbackRates = [
   { value: 0.5, label: '0.5x' },
@@ -94,14 +96,16 @@ function initPlayer() {
       screenShot: true,
       pip: true,
       keyShortcut: true,
-      cssFullscreen: true,
       videoConfig,
       closeVideoClick: false,
       closeVideoDblclick: false,
       closeVideoTouch: false,
       whitelist: ['*'],
       ignoreDocClick: true,
-      enableContextmenu: true
+      enableContextmenu: true,
+      closePlayerBlur: true,
+      closeFocusVideoFocus: true,
+      closePlayVideoFocus: true
     })
 
     player.on('timeupdate', () => {
@@ -119,16 +123,23 @@ function initPlayer() {
 
     player.on('play', () => {
       isPlaying.value = true
+      showControlsTemporarily()
       emit('play')
     })
 
     player.on('playing', () => {
       isPlaying.value = true
+      showControlsTemporarily()
       emit('play')
     })
 
     player.on('pause', () => {
       isPlaying.value = false
+      showControls.value = true
+      if (hideControlsTimer) {
+        clearTimeout(hideControlsTimer)
+        hideControlsTimer = null
+      }
       emit('pause')
     })
 
@@ -140,12 +151,6 @@ function initPlayer() {
       if (player) {
         volume.value = player.volume
         isMuted.value = player.muted
-      }
-    })
-
-    player.on('fullscreenchange', () => {
-      if (player) {
-        isFullscreen.value = player.fullscreen
       }
     })
 
@@ -210,11 +215,15 @@ function setPlaybackRate(rate: number) {
 }
 
 function toggleFullscreen() {
-  if (!player) return
-  if (isFullscreen.value) {
-    player.exitFullscreen()
+  if (!playerContainer.value) return
+  
+  const wrapper = playerContainer.value.parentElement
+  if (!wrapper) return
+  
+  if (document.fullscreenElement) {
+    document.exitFullscreen()
   } else {
-    player.getFullscreen()
+    wrapper.requestFullscreen()
   }
 }
 
@@ -260,15 +269,51 @@ function seekBackward(seconds: number = 10) {
   }
 }
 
+function showControlsTemporarily() {
+  showControls.value = true
+  if (hideControlsTimer) {
+    clearTimeout(hideControlsTimer)
+  }
+  hideControlsTimer = setTimeout(() => {
+    if (isPlaying.value) {
+      showControls.value = false
+    }
+  }, 3000)
+}
+
+function handleMouseMove() {
+  showControlsTemporarily()
+}
+
+function handleMouseLeave() {
+  if (isPlaying.value) {
+    showControls.value = false
+    if (hideControlsTimer) {
+      clearTimeout(hideControlsTimer)
+      hideControlsTimer = null
+    }
+  }
+}
+
+function handleFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement
+}
+
 watch(() => props.url, () => {
   initPlayer()
 })
 
 onMounted(() => {
   initPlayer()
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
 })
 
 onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  if (hideControlsTimer) {
+    clearTimeout(hideControlsTimer)
+    hideControlsTimer = null
+  }
   if (videoElement) {
     videoElement.removeEventListener('enterpictureinpicture', handleEnterPiP)
     videoElement.removeEventListener('leavepictureinpicture', handleLeavePiP)
@@ -300,7 +345,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="video-player-wrapper">
+  <div 
+    class="video-player-wrapper"
+    :class="{ 'video-player-wrapper--show-controls': showControls }"
+    @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave"
+  >
     <div ref="playerContainer" class="video-player"></div>
     
     <div class="video-controls">
@@ -439,6 +489,18 @@ defineExpose({
   overflow: hidden;
 }
 
+.video-player-wrapper:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: unset;
+  border-radius: 0;
+}
+
+.video-player-wrapper:fullscreen .video-player {
+  width: 100%;
+  height: 100%;
+}
+
 .video-player {
   width: 100%;
   height: 100%;
@@ -464,7 +526,7 @@ defineExpose({
   transition: opacity var(--transition-fast);
 }
 
-.video-player-wrapper:hover .video-controls {
+.video-player-wrapper--show-controls .video-controls {
   opacity: 1;
 }
 

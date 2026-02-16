@@ -187,7 +187,11 @@ export const mockUser: User = {
   email: 'user@example.com',
   avatar: 'https://picsum.photos/seed/myavatar/100/100',
   bio: '热爱动漫，喜欢追番~',
-  createdAt: '2024-01-01T00:00:00Z'
+  createdAt: '2024-01-01T00:00:00Z',
+  likeCount: 128,
+  commentCount: 45,
+  animeCount: 23,
+  historyCount: 156
 }
 
 export const mockLoginResponse = {

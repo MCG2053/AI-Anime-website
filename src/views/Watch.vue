@@ -58,7 +58,7 @@ function handlePlay() {
   }
 }
 
-function handleCommentSubmit(content: string) {
+function handleCommentSubmit(content: string, parentId?: number) {
   if (!userStore.isLoggedIn) return
 
   const newComment: Comment = {
@@ -70,7 +70,18 @@ function handleCommentSubmit(content: string) {
     likeCount: 0,
     createdAt: new Date().toISOString()
   }
-  comments.value.unshift(newComment)
+
+  if (parentId) {
+    const parentComment = comments.value.find(c => c.id === parentId)
+    if (parentComment) {
+      if (!parentComment.replies) {
+        parentComment.replies = []
+      }
+      parentComment.replies.push(newComment)
+    }
+  } else {
+    comments.value.unshift(newComment)
+  }
 }
 
 function handleCommentLike(id: number) {
@@ -187,7 +198,6 @@ onMounted(loadVideo)
           </div>
 
           <div class="watch-page__comments">
-            <h3 class="watch-page__section-title">评论</h3>
             <CommentSection
               :comments="comments"
               @submit="handleCommentSubmit"

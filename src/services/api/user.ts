@@ -1,5 +1,16 @@
 import { http } from '../request'
-import type { LoginParams, LoginResponse, User, UserAnime, WatchHistory, AnimeStatus } from '@/types'
+import type { 
+  LoginParams, 
+  LoginResponse, 
+  User, 
+  UserAnime, 
+  WatchHistory, 
+  AnimeStatus,
+  UserStats,
+  UserCommentsResponse,
+  UserLikesResponse,
+  UserCollectionsResponse
+} from '@/types'
 
 export interface RegisterParams {
   username: string
@@ -47,6 +58,24 @@ export const userApi = {
 
   changePassword(oldPassword: string, newPassword: string) {
     return http.put('/user/password', { oldPassword, newPassword })
+  },
+
+  getUserStats() {
+    return http.get<UserStats>('/user/stats')
+  },
+
+  getUserComments(page = 1, pageSize = 20) {
+    return http.get<UserCommentsResponse>('/user/comments', {
+      params: { page, pageSize }
+    })
+  },
+
+  getUserLikes() {
+    return http.get<UserLikesResponse>('/user/likes')
+  },
+
+  getUserCollections() {
+    return http.get<UserCollectionsResponse>('/user/collections')
   },
 
   getAnimeList() {

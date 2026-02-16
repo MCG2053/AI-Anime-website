@@ -5,6 +5,34 @@ export interface User {
   avatar: string
   bio?: string
   createdAt: string
+  likeCount: number
+  commentCount: number
+  animeCount: number
+  historyCount: number
+}
+
+export interface UserStats {
+  likeCount: number
+  commentCount: number
+  animeCount: number
+  historyCount: number
+  watchTime: number
+}
+
+export interface UserCommentsResponse {
+  list: Comment[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export interface UserLikesResponse {
+  videoIds: number[]
+  commentIds: number[]
+}
+
+export interface UserCollectionsResponse {
+  videoIds: number[]
 }
 
 export interface LoginParams {

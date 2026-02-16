@@ -14,6 +14,11 @@ export interface SearchResponse {
   pageSize: number
 }
 
+export interface VideoLikeStatus {
+  isLiked: boolean
+  isCollected: boolean
+}
+
 export const videoApi = {
   getVideoList(params: VideoListParams) {
     return http.get<VideoListResponse>('/videos', { params })
@@ -29,6 +34,10 @@ export const videoApi = {
 
   getTags() {
     return http.get<Tag[]>('/tags')
+  },
+
+  getVideoLikeStatus(id: number) {
+    return http.get<VideoLikeStatus>(`/videos/${id}/status`)
   },
 
   likeVideo(id: number) {
