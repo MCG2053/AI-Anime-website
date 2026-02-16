@@ -72,8 +72,6 @@ AnimeVideo 是一个功能完善的动漫视频播放平台前端项目，提供
 src/
 ├── components/           # 组件目录
 │   ├── common/          # 通用组件
-│   │   ├── ActionBtn.vue
-│   │   ├── CategoryTabs.vue
 │   │   ├── Skeleton.vue
 │   │   ├── Toast.vue
 │   │   ├── VideoCard.vue
@@ -88,7 +86,6 @@ src/
 │   │   └── ThemeToggle.vue
 │   └── video/           # 视频相关组件
 │       ├── CommentSection.vue
-│       ├── DanmakuSender.vue
 │       └── VideoPlayer.vue
 ├── router/              # 路由配置
 │   └── index.ts
