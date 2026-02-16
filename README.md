@@ -1,5 +1,7 @@
 # AnimeVideo - 动漫视频播放平台
 
+[English](./README.en.md) | 简体中文
+
 一个现代化的动漫视频播放前端应用，基于 Vue 3 + TypeScript + Vite 构建。
 
 ## 项目简介

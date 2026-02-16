@@ -1,5 +1,7 @@
 # AnimeVideo - Anime Video Streaming Platform
 
+English | [简体中文](./README.md)
+
 A modern anime video streaming frontend application built with Vue 3 + TypeScript + Vite.
 
 ## Project Overview
