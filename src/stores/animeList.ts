@@ -1,17 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { UserAnime, AnimeStatus, Video } from '@/types'
+import type { UserAnime, AnimeStatus, Video, WatchHistory } from '@/types'
+import { userApi } from '@/services/api'
 
 const STORAGE_KEY = 'anime_user_list'
+const HISTORY_KEY = 'anime_watch_history'
+const MAX_HISTORY = 50
 
 export const useAnimeListStore = defineStore('animeList', () => {
   const watchingList = ref<UserAnime[]>([])
   const completedList = ref<UserAnime[]>([])
-  const historyList = ref<UserAnime[]>([])
+  const watchHistory = ref<WatchHistory[]>([])
 
   const watchingCount = computed(() => watchingList.value.length)
   const completedCount = computed(() => completedList.value.length)
-  const historyCount = computed(() => historyList.value.length)
+  const historyCount = computed(() => watchHistory.value.length)
 
   function loadFromStorage() {
     try {
@@ -20,7 +23,10 @@ export const useAnimeListStore = defineStore('animeList', () => {
         const parsed = JSON.parse(data)
         watchingList.value = parsed.watching || []
         completedList.value = parsed.completed || []
-        historyList.value = parsed.history || []
+      }
+      const historyData = localStorage.getItem(HISTORY_KEY)
+      if (historyData) {
+        watchHistory.value = JSON.parse(historyData)
       }
     } catch (e) {
       console.error('Failed to load anime list from storage:', e)
@@ -31,12 +37,19 @@ export const useAnimeListStore = defineStore('animeList', () => {
     try {
       const data = {
         watching: watchingList.value,
-        completed: completedList.value,
-        history: historyList.value
+        completed: completedList.value
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     } catch (e) {
       console.error('Failed to save anime list to storage:', e)
+    }
+  }
+
+  function saveHistoryToStorage() {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(watchHistory.value))
+    } catch (e) {
+      console.error('Failed to save history to storage:', e)
     }
   }
 
@@ -54,26 +67,88 @@ export const useAnimeListStore = defineStore('animeList', () => {
     return getAnimeStatus(videoId) !== null
   }
 
+  function addToHistory(video: Video, episodeId: number, episodeTitle: string, progress: number = 0) {
+    console.log('addToHistory called:', { videoId: video.id, title: video.title, episodeId, episodeTitle })
+    const existingIndex = watchHistory.value.findIndex(item => item.videoId === video.id)
+    
+    const historyItem: WatchHistory = {
+      videoId: video.id,
+      episodeId,
+      episodeTitle,
+      watchedAt: new Date().toISOString(),
+      progress,
+      video
+    }
+
+    if (existingIndex !== -1) {
+      watchHistory.value.splice(existingIndex, 1)
+    }
+    
+    watchHistory.value.unshift(historyItem)
+    
+    console.log('watchHistory after adding:', watchHistory.value.length, watchHistory.value)
+    
+    if (watchHistory.value.length > MAX_HISTORY) {
+      watchHistory.value = watchHistory.value.slice(0, MAX_HISTORY)
+    }
+    
+    saveHistoryToStorage()
+    console.log('History saved to localStorage')
+
+    userApi.updateWatchHistory({
+      videoId: video.id,
+      episodeId,
+      episodeTitle,
+      progress
+    }).catch(err => {
+      console.log('Failed to sync history to server:', err)
+    })
+  }
+
+  function getHistoryItem(videoId: number): WatchHistory | undefined {
+    return watchHistory.value.find(item => item.videoId === videoId)
+  }
+
+  function clearHistory() {
+    watchHistory.value = []
+    saveHistoryToStorage()
+    
+    userApi.clearWatchHistory().catch(err => {
+      console.log('Failed to clear history on server:', err)
+    })
+  }
+
+  function removeHistoryItem(videoId: number) {
+    const index = watchHistory.value.findIndex(item => item.videoId === videoId)
+    if (index !== -1) {
+      watchHistory.value.splice(index, 1)
+      saveHistoryToStorage()
+    }
+    
+    userApi.removeWatchHistory(videoId).catch(err => {
+      console.log('Failed to remove history item on server:', err)
+    })
+  }
+
   async function addToWatching(video: Video): Promise<boolean> {
     try {
-      const response = await addAnimeApi(video.id, 'watching')
-      if (response.success) {
-        removeFromCompleted(video.id)
-        
-        if (!watchingList.value.some(item => item.videoId === video.id)) {
-          watchingList.value.push({
-            videoId: video.id,
-            status: 'watching',
-            addedAt: new Date().toISOString(),
-            video
-          })
-        }
-        saveToStorage()
-        return true
+      await userApi.addAnime(video.id, 'watching')
+      
+      removeFromCompleted(video.id)
+      
+      if (!watchingList.value.some(item => item.videoId === video.id)) {
+        watchingList.value.push({
+          videoId: video.id,
+          status: 'watching',
+          addedAt: new Date().toISOString(),
+          video
+        })
       }
-      return false
+      saveToStorage()
+      return true
     } catch (error) {
       console.error('Failed to add to watching:', error)
+      
       removeFromCompleted(video.id)
       
       if (!watchingList.value.some(item => item.videoId === video.id)) {
@@ -91,24 +166,23 @@ export const useAnimeListStore = defineStore('animeList', () => {
 
   async function addToCompleted(video: Video): Promise<boolean> {
     try {
-      const response = await addAnimeApi(video.id, 'completed')
-      if (response.success) {
-        removeFromWatching(video.id)
-        
-        if (!completedList.value.some(item => item.videoId === video.id)) {
-          completedList.value.push({
-            videoId: video.id,
-            status: 'completed',
-            addedAt: new Date().toISOString(),
-            video
-          })
-        }
-        saveToStorage()
-        return true
+      await userApi.addAnime(video.id, 'completed')
+      
+      removeFromWatching(video.id)
+      
+      if (!completedList.value.some(item => item.videoId === video.id)) {
+        completedList.value.push({
+          videoId: video.id,
+          status: 'completed',
+          addedAt: new Date().toISOString(),
+          video
+        })
       }
-      return false
+      saveToStorage()
+      return true
     } catch (error) {
       console.error('Failed to add to completed:', error)
+      
       removeFromWatching(video.id)
       
       if (!completedList.value.some(item => item.videoId === video.id)) {
@@ -142,13 +216,10 @@ export const useAnimeListStore = defineStore('animeList', () => {
 
   async function removeAnime(videoId: number): Promise<boolean> {
     try {
-      const response = await removeAnimeApi(videoId)
-      if (response.success) {
-        removeFromWatching(videoId)
-        removeFromCompleted(videoId)
-        return true
-      }
-      return false
+      await userApi.removeAnime(videoId)
+      removeFromWatching(videoId)
+      removeFromCompleted(videoId)
+      return true
     } catch (error) {
       console.error('Failed to remove anime:', error)
       removeFromWatching(videoId)
@@ -159,11 +230,13 @@ export const useAnimeListStore = defineStore('animeList', () => {
 
   async function fetchUserAnimeList(): Promise<void> {
     try {
-      const response = await getUserAnimeListApi()
-      watchingList.value = response.watching || []
-      completedList.value = response.completed || []
-      historyList.value = response.history || []
+      const response = await userApi.getAnimeList()
+      const data = response.data.data
+      watchingList.value = data.watching || []
+      completedList.value = data.completed || []
+      watchHistory.value = data.history || []
       saveToStorage()
+      saveHistoryToStorage()
     } catch (error) {
       console.error('Failed to fetch user anime list:', error)
       loadFromStorage()
@@ -175,7 +248,7 @@ export const useAnimeListStore = defineStore('animeList', () => {
   return {
     watchingList,
     completedList,
-    historyList,
+    watchHistory,
     watchingCount,
     completedCount,
     historyCount,
@@ -184,25 +257,10 @@ export const useAnimeListStore = defineStore('animeList', () => {
     addToWatching,
     addToCompleted,
     removeAnime,
-    fetchUserAnimeList
+    fetchUserAnimeList,
+    addToHistory,
+    getHistoryItem,
+    clearHistory,
+    removeHistoryItem
   }
 })
-
-async function addAnimeApi(videoId: number, status: AnimeStatus): Promise<{ success: boolean }> {
-  console.log(`[API] POST /api/user/anime - Adding video ${videoId} to ${status}`)
-  return { success: true }
-}
-
-async function removeAnimeApi(videoId: number): Promise<{ success: boolean }> {
-  console.log(`[API] DELETE /api/user/anime/${videoId}`)
-  return { success: true }
-}
-
-async function getUserAnimeListApi(): Promise<{ watching: UserAnime[], completed: UserAnime[], history: UserAnime[] }> {
-  console.log('[API] GET /api/user/anime-list')
-  return {
-    watching: [],
-    completed: [],
-    history: []
-  }
-}

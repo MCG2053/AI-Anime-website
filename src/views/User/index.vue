@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { NEmpty } from 'naive-ui'
+import { NEmpty, NInput } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
 import { useAnimeListStore } from '@/stores/animeList'
 import VideoCard from '@/components/common/VideoCard.vue'
@@ -35,10 +35,75 @@ const currentVideos = computed(() => {
   } else if (activeTab.value === 'completed') {
     list = animeListStore.completedList.map(item => item.video).filter(Boolean) as Video[]
   } else {
-    list = animeListStore.historyList.map(item => item.video).filter(Boolean) as Video[]
+    list = animeListStore.watchHistory.map(item => item.video).filter(Boolean) as Video[]
   }
   return list
 })
+
+const showEditModal = ref(false)
+const showAvatarModal = ref(false)
+const editForm = ref({
+  username: '',
+  avatar: '',
+  bio: ''
+})
+
+const avatarOptions = [
+  'https://picsum.photos/seed/avatar1/200/200',
+  'https://picsum.photos/seed/avatar2/200/200',
+  'https://picsum.photos/seed/avatar3/200/200',
+  'https://picsum.photos/seed/avatar4/200/200',
+  'https://picsum.photos/seed/avatar5/200/200',
+  'https://picsum.photos/seed/avatar6/200/200',
+  'https://picsum.photos/seed/avatar7/200/200',
+  'https://picsum.photos/seed/avatar8/200/200',
+  'https://picsum.photos/seed/avatar9/200/200',
+  'https://picsum.photos/seed/avatar10/200/200',
+  'https://picsum.photos/seed/avatar11/200/200',
+  'https://picsum.photos/seed/avatar12/200/200'
+]
+
+function openAvatarModal() {
+  editForm.value = {
+    username: user.value?.username || '',
+    avatar: user.value?.avatar || '',
+    bio: user.value?.bio || ''
+  }
+  showAvatarModal.value = true
+}
+
+function openEditModal() {
+  editForm.value = {
+    username: user.value?.username || '',
+    avatar: user.value?.avatar || '',
+    bio: user.value?.bio || ''
+  }
+  showEditModal.value = true
+}
+
+function selectAvatar(avatar: string) {
+  editForm.value.avatar = avatar
+}
+
+function saveAvatar() {
+  userStore.updateUserInfo({
+    avatar: editForm.value.avatar
+  })
+  showAvatarModal.value = false
+}
+
+function saveProfile() {
+  if (!editForm.value.username.trim()) {
+    return
+  }
+  userStore.updateUserInfo({
+    username: editForm.value.username.trim(),
+    bio: editForm.value.bio.trim()
+  })
+  showEditModal.value = false
+}
+
+const userBio = computed(() => user.value?.bio || '这个人很懒，什么都没写~')
 </script>
 
 <template>
@@ -51,23 +116,37 @@ const currentVideos = computed(() => {
             :alt="user?.username"
             class="user-space__avatar"
           />
+          <button class="user-space__avatar-edit" @click="openAvatarModal" title="更换头像">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </button>
         </div>
 
         <div class="user-space__info">
           <h1 class="user-space__username">{{ user?.username }}</h1>
-          <p class="user-space__sign">这个人很懒，什么都没写~</p>
+          <p class="user-space__sign">{{ userBio }}</p>
+        </div>
+
+        <div class="user-space__actions">
+          <button class="user-space__edit-btn" @click="openEditModal">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+            编辑资料
+          </button>
         </div>
 
         <div class="user-space__stats">
-          <div class="user-space__stat-item">
+          <div class="user-space__stat-item" @click="activeTab = 'watching'">
             <span class="user-space__stat-value">{{ stats.watching }}</span>
             <span class="user-space__stat-label">正在追</span>
           </div>
-          <div class="user-space__stat-item">
+          <div class="user-space__stat-item" @click="activeTab = 'completed'">
             <span class="user-space__stat-value">{{ stats.completed }}</span>
             <span class="user-space__stat-label">已追完</span>
           </div>
-          <div class="user-space__stat-item">
+          <div class="user-space__stat-item" @click="activeTab = 'history'">
             <span class="user-space__stat-value">{{ stats.history }}</span>
             <span class="user-space__stat-label">历史</span>
           </div>
@@ -129,6 +208,88 @@ const currentVideos = computed(() => {
         </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showAvatarModal" class="modal-overlay" @click.self="showAvatarModal = false">
+          <div class="modal-container">
+            <div class="modal-header">
+              <h3 class="modal-title">更换头像</h3>
+              <button class="modal-close" @click="showAvatarModal = false">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="avatar-preview">
+                <img :src="editForm.avatar" alt="头像预览" class="avatar-preview__img" />
+              </div>
+              <div class="avatar-grid">
+                <button
+                  v-for="avatar in avatarOptions"
+                  :key="avatar"
+                  :class="['avatar-option', { 'avatar-option--selected': editForm.avatar === avatar }]"
+                  @click="selectAvatar(avatar)"
+                >
+                  <img :src="avatar" alt="头像选项" />
+                </button>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" @click="showAvatarModal = false">取消</button>
+              <button class="btn btn-primary" @click="saveAvatar">保存</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+          <div class="modal-container">
+            <div class="modal-header">
+              <h3 class="modal-title">编辑个人资料</h3>
+              <button class="modal-close" @click="showEditModal = false">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="edit-form">
+                <div class="edit-form__item">
+                  <label class="edit-form__label">用户名</label>
+                  <NInput
+                    v-model:value="editForm.username"
+                    placeholder="请输入用户名"
+                    maxlength="20"
+                    show-count
+                  />
+                </div>
+
+                <div class="edit-form__item">
+                  <label class="edit-form__label">个人简介</label>
+                  <NInput
+                    v-model:value="editForm.bio"
+                    type="textarea"
+                    placeholder="介绍一下自己吧~"
+                    maxlength="100"
+                    show-count
+                    :rows="3"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" @click="showEditModal = false">取消</button>
+              <button class="btn btn-primary" @click="saveProfile" :disabled="!editForm.username.trim()">保存</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -195,6 +356,27 @@ const currentVideos = computed(() => {
   display: block;
 }
 
+.user-space__avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--bg-secondary);
+  transition: transform var(--transition-fast);
+}
+
+.user-space__avatar-edit:hover {
+  transform: scale(1.1);
+}
+
 .user-space__info {
   flex: 1;
   min-width: 0;
@@ -214,6 +396,30 @@ const currentVideos = computed(() => {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
+}
+
+.user-space__actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.user-space__edit-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.user-space__edit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
 }
 
 .user-space__stats {
@@ -411,6 +617,10 @@ const currentVideos = computed(() => {
     height: 64px;
   }
 
+  .user-space__actions {
+    margin-top: var(--spacing-sm);
+  }
+
   .user-space__stats {
     padding: var(--spacing-md) 0;
   }
@@ -426,5 +636,164 @@ const currentVideos = computed(() => {
     padding: 8px 12px;
     font-size: var(--font-size-sm);
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--spacing-md);
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.modal-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-color);
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.avatar-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.avatar-preview__img {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 4px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.avatar-option {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all var(--transition-fast);
+  padding: 0;
+  background: none;
+}
+
+.avatar-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-option:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.avatar-option--selected {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.3);
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.edit-form__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.edit-form__label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-active .modal-container,
+.modal-leave-active .modal-container {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-container,
+.modal-leave-to .modal-container {
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
 }
 </style>

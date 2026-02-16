@@ -3,6 +3,7 @@ export interface User {
   username: string
   email: string
   avatar: string
+  bio?: string
   createdAt: string
 }
 
@@ -132,8 +133,17 @@ export interface UserAnime {
   video?: Video
 }
 
+export interface WatchHistory {
+  videoId: number
+  episodeId: number
+  episodeTitle: string
+  watchedAt: string
+  progress: number
+  video?: Video
+}
+
 export interface UserAnimeListResponse {
   watching: UserAnime[]
   completed: UserAnime[]
-  history: UserAnime[]
+  history: WatchHistory[]
 }

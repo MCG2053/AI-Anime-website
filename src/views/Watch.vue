@@ -19,6 +19,7 @@ const video = ref<VideoDetail | null>(null)
 const comments = ref<Comment[]>(mockComments)
 const currentTime = ref(0)
 const relatedVideos = ref<any[]>([])
+const hasRecordedHistory = ref(false)
 
 const videoId = computed(() => Number(route.params.id))
 const episodeId = computed(() => Number(route.params.episode) || 1)
@@ -38,6 +39,23 @@ const isCompleted = computed(() => animeStatus.value === 'completed')
 
 function handleTimeUpdate(time: number) {
   currentTime.value = time
+}
+
+function handlePlay() {
+  console.log('handlePlay called', { video: video.value, currentEpisode: currentEpisode.value, hasRecordedHistory: hasRecordedHistory.value })
+  if (!video.value || !currentEpisode.value) return
+  
+  if (!hasRecordedHistory.value) {
+    console.log('Adding to history:', video.value.title, currentEpisode.value.title)
+    animeListStore.addToHistory(
+      video.value,
+      currentEpisode.value.id,
+      currentEpisode.value.title,
+      0
+    )
+    hasRecordedHistory.value = true
+    console.log('History count after adding:', animeListStore.historyCount)
+  }
 }
 
 function handleCommentSubmit(content: string) {
@@ -100,6 +118,7 @@ function goToDetail() {
 
 function loadVideo() {
   loading.value = true
+  hasRecordedHistory.value = false
   setTimeout(() => {
     video.value = generateMockVideoDetail(videoId.value)
     relatedVideos.value = generateMockVideos(6)
@@ -116,94 +135,69 @@ onMounted(loadVideo)
   <div class="watch-page">
     <NSpin :show="loading">
       <div v-if="video" class="watch-page__container">
-        <div class="watch-page__main">
-          <div class="watch-page__player">
-            <VideoPlayer
-              :url="video.videoUrl"
-              :poster="video.cover"
-              @timeupdate="handleTimeUpdate"
-            />
-          </div>
-
-          <div class="watch-page__info">
-            <div class="watch-page__header">
-              <div class="watch-page__title-area">
-                <h1 class="watch-page__title" @click="goToDetail">{{ video.title }}</h1>
-                <span class="watch-page__episode" v-if="currentEpisode">{{ currentEpisode.title }}</span>
-              </div>
-              <div class="watch-page__actions">
-                <button 
-                  :class="['watch-page__action-btn', { 'watch-page__action-btn--active': isWatching }]" 
-                  @click="handleWatching"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                  正在追
-                </button>
-                <button 
-                  :class="['watch-page__action-btn', { 'watch-page__action-btn--active': isCompleted }]" 
-                  @click="handleCompleted"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                  已追完
-                </button>
-              </div>
-            </div>
-
-            <div class="watch-page__episodes">
-              <h3 class="watch-page__section-title">选集</h3>
-              <div class="watch-page__episode-list">
-                <button
-                  v-for="episode in video.episodes"
-                  :key="episode.id"
-                  :class="['watch-page__episode-btn', { 'watch-page__episode-btn--active': episode.id === episodeId }]"
-                  @click="handleEpisodeClick(episode.id)"
-                >
-                  {{ episode.title }}
-                </button>
-              </div>
-            </div>
-
-            <div class="watch-page__comments">
-              <h3 class="watch-page__section-title">评论</h3>
-              <CommentSection
-                :comments="comments"
-                @submit="handleCommentSubmit"
-                @like="handleCommentLike"
-              />
-            </div>
-          </div>
+        <div class="watch-page__player">
+          <VideoPlayer
+            :url="video.videoUrl"
+            :poster="video.cover"
+            @timeupdate="handleTimeUpdate"
+            @play="handlePlay"
+          />
         </div>
 
-        <div class="watch-page__sidebar">
-          <div class="watch-page__detail-card">
-            <div class="watch-page__detail-cover">
-              <img :src="video.cover" :alt="video.title" @click="goToDetail" />
+        <div class="watch-page__info">
+          <div class="watch-page__header">
+            <div class="watch-page__title-area">
+              <h1 class="watch-page__title" @click="goToDetail">{{ video.title }}</h1>
+              <span class="watch-page__episode" v-if="currentEpisode">{{ currentEpisode.title }}</span>
             </div>
-            <div class="watch-page__detail-info">
-              <h4 class="watch-page__detail-title" @click="goToDetail">{{ video.title }}</h4>
-              <div class="watch-page__detail-meta">
-                <span>{{ video.year }}</span>
-                <span>{{ video.country }}</span>
-                <span>{{ video.episode }}</span>
-              </div>
-              <div class="watch-page__detail-stats">
-                <span class="watch-page__detail-stat">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                  </svg>
-                  {{ video.playCount }}
-                </span>
-              </div>
+            <div class="watch-page__actions">
+              <button 
+                :class="['watch-page__action-btn', { 'watch-page__action-btn--active': isWatching }]" 
+                @click="handleWatching"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                正在追
+              </button>
+              <button 
+                :class="['watch-page__action-btn', { 'watch-page__action-btn--active': isCompleted }]" 
+                @click="handleCompleted"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                已追完
+              </button>
             </div>
+          </div>
+
+          <div class="watch-page__episodes">
+            <h3 class="watch-page__section-title">选集</h3>
+            <div class="watch-page__episode-list">
+              <button
+                v-for="episode in video.episodes"
+                :key="episode.id"
+                :class="['watch-page__episode-btn', { 'watch-page__episode-btn--active': episode.id === episodeId }]"
+                @click="handleEpisodeClick(episode.id)"
+              >
+                {{ episode.title }}
+              </button>
+            </div>
+          </div>
+
+          <div class="watch-page__comments">
+            <h3 class="watch-page__section-title">评论</h3>
+            <CommentSection
+              :comments="comments"
+              @submit="handleCommentSubmit"
+              @like="handleCommentLike"
+            />
           </div>
 
           <div class="watch-page__related">
             <h3 class="watch-page__section-title">相关推荐</h3>
-            <div class="watch-page__related-list">
+            <div class="watch-page__related-grid">
               <router-link
                 v-for="v in relatedVideos"
                 :key="v.id"
@@ -231,15 +225,9 @@ onMounted(loadVideo)
 }
 
 .watch-page__container {
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: var(--spacing-md);
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: var(--spacing-lg);
-}
-
-.watch-page__main {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
@@ -250,6 +238,7 @@ onMounted(loadVideo)
   border-radius: var(--radius-lg);
   overflow: hidden;
   aspect-ratio: 16 / 9;
+  width: 100%;
 }
 
 .watch-page__info {
@@ -340,16 +329,30 @@ onMounted(loadVideo)
 }
 
 .watch-page__section-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--text-color);
   margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--border-strong);
 }
 
 .watch-page__episodes {
   background-color: var(--bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .watch-page__episodes {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .watch-page__episodes {
+    padding: var(--spacing-sm);
+  }
 }
 
 .watch-page__episode-list {
@@ -358,21 +361,8 @@ onMounted(loadVideo)
   gap: var(--spacing-sm);
 }
 
-@media (max-width: 768px) {
-  .watch-page__episode-list {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .watch-page__episode-list {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xs);
-  }
-}
-
 .watch-page__episode-btn {
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   background-color: var(--bg-color);
@@ -393,121 +383,52 @@ onMounted(loadVideo)
   border-color: var(--color-primary);
 }
 
-.watch-page__comments {
-  background-color: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
-}
-
-.watch-page__sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.watch-page__detail-card {
-  display: flex;
-  gap: var(--spacing-md);
-  background-color: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
-}
-
-.watch-page__detail-cover {
-  flex-shrink: 0;
-  width: 100px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.watch-page__detail-cover img {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-}
-
-.watch-page__detail-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.watch-page__detail-title {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.watch-page__detail-title:hover {
-  color: var(--color-primary);
-}
-
-.watch-page__detail-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
-.watch-page__detail-stats {
-  margin-top: auto;
-}
-
-.watch-page__detail-stat {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
-.watch-page__detail-stat svg {
-  width: 14px;
-  height: 14px;
-}
-
 .watch-page__related {
   background-color: var(--bg-secondary);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
-.watch-page__related-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+@media (max-width: 768px) {
+  .watch-page__related {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .watch-page__related {
+    padding: var(--spacing-sm);
+  }
+}
+
+.watch-page__related-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-md);
 }
 
 .watch-page__related-item {
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs);
+  flex-direction: column;
   border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast);
+  transition: transform var(--transition-fast);
 }
 
 .watch-page__related-item:hover {
-  background-color: var(--bg-hover);
+  transform: translateY(-4px);
 }
 
 .watch-page__related-cover {
-  width: 80px;
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
+  border-radius: var(--radius-md);
 }
 
 .watch-page__related-info {
-  flex: 1;
+  padding: var(--spacing-xs) 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 4px;
   min-width: 0;
 }
@@ -517,6 +438,11 @@ onMounted(loadVideo)
   font-weight: 500;
   color: var(--text-color);
   line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .watch-page__related-views {
@@ -524,29 +450,43 @@ onMounted(loadVideo)
   color: var(--text-muted);
 }
 
+.watch-page__comments {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .watch-page__comments {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .watch-page__comments {
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 1200px) {
+  .watch-page__related-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 @media (max-width: 1024px) {
-  .watch-page__container {
-    grid-template-columns: 1fr;
-  }
-
-  .watch-page__sidebar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-  }
-
-  .watch-page__detail-card {
-    display: none;
-  }
-
-  .watch-page__related {
-    margin-top: 0;
+  .watch-page__related-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .watch-page__sidebar {
-    grid-template-columns: 1fr;
+  .watch-page__episode-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .watch-page__related-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -559,6 +499,17 @@ onMounted(loadVideo)
   .watch-page__actions {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .watch-page__related-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .watch-page__episode-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xs);
   }
 }
 </style>

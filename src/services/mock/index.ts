@@ -186,6 +186,7 @@ export const mockUser: User = {
   username: '动漫爱好者',
   email: 'user@example.com',
   avatar: 'https://picsum.photos/seed/myavatar/100/100',
+  bio: '热爱动漫，喜欢追番~',
   createdAt: '2024-01-01T00:00:00Z'
 }
 
