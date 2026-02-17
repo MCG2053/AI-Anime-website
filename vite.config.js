@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
-import { copyFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 export default defineConfig({
     base: '/AI-Anime-website/',
     plugins: [
@@ -9,7 +9,11 @@ export default defineConfig({
         {
             name: 'copy-404-html',
             closeBundle: function () {
-                copyFileSync(resolve(__dirname, 'dist/index.html'), resolve(__dirname, 'dist/404.html'));
+                var indexPath = resolve(__dirname, 'dist/index.html');
+                var content = readFileSync(indexPath, 'utf-8');
+                var redirectScript = "\n    <script>\n      // SPA redirect for GitHub Pages\n      sessionStorage.redirect = location.href;\n    </script>";
+                var newContent = content.replace('</head>', redirectScript + '\n  </head>');
+                writeFileSync(resolve(__dirname, 'dist/404.html'), newContent);
             }
         }
     ],
