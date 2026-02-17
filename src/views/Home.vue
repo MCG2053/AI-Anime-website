@@ -110,6 +110,8 @@ onMounted(() => {
   }
   if (isScheduleView.value) {
     loadWeekSchedule()
+  } else {
+    loadVideos()
   }
 })
 </script>
