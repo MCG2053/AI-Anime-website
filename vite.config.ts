@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import { copyFileSync } from 'fs'
 
 export default defineConfig({
-  base: '/AI-Anime-Website/',
+  base: '/AI-Anime-website/',
   plugins: [
     vue(),
     {
