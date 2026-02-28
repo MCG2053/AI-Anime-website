@@ -3,7 +3,7 @@
 English | [简体中文](./README.md)
 
 A modern anime video streaming frontend application built with Vue 3 + TypeScript + Vite.  
-Preview-> [https://mcg2053.github.io/AI-Anime-website/]
+Preview-> [https://mcg2053.github.io/AI-Anime-website/]  
 Server-> [https://github.com/MCG2053/AI-Anime-website-backend]
 
 ## Disclaimer  
