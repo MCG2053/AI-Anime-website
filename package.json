@@ -1,0 +1,48 @@
+{
+  "name": "anime_website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "anime",
+    "video",
+    "vue3",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "动漫视频播放前端网站",
+  "dependencies": {
+    "artplayer": "^5.3.0",
+    "artplayer-plugin-danmuku": "^5.2.0",
+    "axios": "^1.13.5",
+    "naive-ui": "^2.43.2",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.28",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.2.3",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vue/test-utils": "^2.4.6",
+    "autoprefixer": "^10.4.24",
+    "happy-dom": "^20.7.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18",
+    "vue-tsc": "^3.2.4"
+  }
+}

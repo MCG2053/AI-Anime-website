@@ -1,0 +1,12 @@
+feat: complete danmaku API, add tests, clean up project
+
+- Complete danmaku API with CRUD operations
+- Add danmaku API tests (29 test cases)
+- Add mock data tests (13 test cases)
+- Fix sendDanmaku to support different types
+- Integrate danmaku API in Watch.vue
+- Remove unused Toast.vue component
+- Extract common utility functions (formatViews, getCurrentDay, getDayName)
+- Update VideoCard and VideoListItem to use shared utilities
+- Update README documentation
+- Fix vite.config.ts for vitest compatibility
