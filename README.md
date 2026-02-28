@@ -2,7 +2,10 @@
 
 [English](./README.en.md) | 简体中文
 
-一个现代化的动漫视频播放前端应用，基于 Vue 3 + TypeScript + Vite 构建。
+一个现代化的动漫视频播放前端应用，基于 Vue 3 + TypeScript + Vite 构建。  
+网站预览-> [https://mcg2053.github.io/AI-Anime-website/]
+后端-> [https://github.com/MCG2053/AI-Anime-website-backend]  
+
 ## 免责声明  
 
 本项目代码完全由人工智能生成，作者未对代码的正确性、安全性、可靠性或适用性做任何明示或暗示的保证。  
